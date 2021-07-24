@@ -1,3 +1,6 @@
+
+### 2021-07-24 17:08:14.594734: clock-in
+
 ### 2021-07-24 14:26:39.619830: clock-out
 
 * experimenting with cbpro, parameterizing granularity for historical query
