@@ -1,3 +1,18 @@
+* experimenting with cbpro, parameterizing granularity for historical query
+* looking at cbpro api
+
+
+> **Caution**: Historical rates should not be polled frequently.
+> If you need real-time information, use the trade and book
+> endpoints along with the websocket feed.
+> 
+> The maximum number of data points for a single request is 200
+> candles. If your selection of start/end time and granularity
+> will result in more than 200 data points, your request will be
+> rejected. If you wish to retrieve fine granularity data over a
+> larger time range, you will need to make multiple requests with
+> new start/end ranges.
+
 
 ### 2021-07-24 12:49:30.340861: clock-in
 

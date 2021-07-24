@@ -36,6 +36,9 @@ def get_timezones(url):
 
 granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300)) # seconds
 
+# see api for valid intervals https://docs.pro.coinbase.com/#get-historic-rates
+assert granularity in [60, 300, 900, 3600, 21600, 86400]
+
 audiolizer_temp_dir = os.environ.get('AUDIOLIZER_TEMP', './history')
 logger.info('audiolizer temp data: {}'.format(audiolizer_temp_dir))
 
@@ -88,11 +91,11 @@ def fetch_data(ticker, granularity, start_, end_):
         raise
 
 
-def write_data(df, ticker):
+def write_data(df, ticker, granularity):
     for t, day in df.groupby(pd.Grouper(freq='1D')):
         tstr = t.strftime('%Y-%m-%d-%H-%M')
-        fname = audiolizer_temp_dir + '/{}-{}.csv.gz'.format(
-                ticker, t.strftime('%Y-%m-%d'))
+        fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
+                ticker, granularity, t.strftime('%Y-%m-%d'))
         if len(day) > 1:
             day.to_csv(fname, compression='gzip')
             logger.info('wrote {}'.format(fname))
@@ -106,10 +109,10 @@ def fetch_missing(files_status, ticker, granularity):
         endpoints = [t.strftime('%Y-%m-%d-%H-%M') for t in [t1, t2]]
         logger.info('fetching {}, {}'.format(len(g), endpoints))
         df = fetch_data(ticker, granularity, *endpoints).loc[t1:t2] # only grab data between endpoints
-        write_data(df, ticker)
+        write_data(df, ticker, granularity)
 
         
-def get_files_status(ticker, start_date, end_date):
+def get_files_status(ticker, granularity, start_date, end_date):
     start_date = pd.to_datetime(start_date.date())
     end_date = pd.to_datetime(end_date.date())
     fnames = []
@@ -120,8 +123,8 @@ def get_files_status(ticker, start_date, end_date):
     last_found = -1
     for int_ in pd.interval_range(start_date, end_date):
         dates.append(int_.left)
-        fname = audiolizer_temp_dir + '/{}-{}.csv.gz'.format(
-            ticker, int_.left.strftime('%Y-%m-%d'))
+        fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
+            ticker, granularity, int_.left.strftime('%Y-%m-%d'))
         found = int(os.path.exists(fname))
         foundlings.append(found)
         if found != last_found:
@@ -150,18 +153,19 @@ def get_today_GMT():
 # * INFO:history:getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 04:07:48.872110
 # * 2021-07-14 00:00:00 -> 2021-07-21 04:07:22.738431
 
-files_status = get_files_status('BTC-USD', pd.to_datetime('2021-07-14 00:00:00'), pd.to_datetime('2021-07-21 04:07:22.738431'))
+# + active="ipynb"
+# files_status = get_files_status('BTC-USD', pd.to_datetime('2021-07-14 00:00:00'), pd.to_datetime('2021-07-21 04:07:22.738431'))
+#
+# files_status
 
-files_status
-
-for batch, g in files_status[files_status.found==0].groupby('batch', sort=False):
-    t1, t2 = g.iloc[[0, -1]].index
-    # extend by 1 day whether or not t1 == t2
-    t2 += pd.Timedelta('1D')
-    endpoints = [t.strftime('%Y-%m-%d-%H-%M') for t in [t1, t2]]
-    print('fetching {}, {}'.format(len(g), endpoints))
-    df = fetch_data('BTC-USD', granularity, *endpoints)
-#     write_data(df, ticker)
+# + active="ipynb"
+# for batch, g in files_status[files_status.found==0].groupby('batch', sort=False):
+#     t1, t2 = g.iloc[[0, -1]].index
+#     # extend by 1 day whether or not t1 == t2
+#     t2 += pd.Timedelta('1D')
+#     endpoints = [t.strftime('%Y-%m-%d-%H-%M') for t in [t1, t2]]
+#     print('fetching {}, {}'.format(len(g), endpoints))
+#     df = fetch_data('BTC-USD', granularity, *endpoints)
 
 # +
 def get_today(ticker, granularity):
@@ -221,7 +225,7 @@ def get_history(ticker, start_date, end_date = None, granularity=granularity):
     assert start_date <= end_date
     
     logger.info('getting {} files status: {} -> {}'.format(ticker, start_date, end_date))
-    files_status = get_files_status(ticker, start_date, end_date)
+    files_status = get_files_status(ticker, granularity, start_date, end_date)
     fetch_missing(files_status, ticker, granularity)
     
     if len(files_status) == 0:
@@ -249,11 +253,9 @@ def get_history(ticker, start_date, end_date = None, granularity=granularity):
             today_data.to_csv(today_fname, compression='gzip')
         df = pd.concat([df, today_data]).drop_duplicates()
     return df
-# -
 
-to = get_today('BTC-USD', 300)
-
-to.index
+# + active="ipynb"
+# to = get_today('BTC-USD', 300)
 
 # + active="ipynb"
 # hist = get_history('BTC-USD',
@@ -275,3 +277,31 @@ to.index
 # + active="ipynb"
 # today_file = 'history/BTC-USD-today.csv.gz'
 # pd.read_csv(today_file, index_col='time', parse_dates=True, compression='gzip')
+# -
+
+# ## Testing historic data
+#
+# > The maximum number of data points for a single request is 200
+# > candles. If your selection of start/end time and granularity
+# > will result in more than 200 data points, your request will be
+# > rejected. If you wish to retrieve fine granularity data over a
+# > larger time range, you will need to make multiple requests with
+# > new start/end ranges.
+
+# + active="ipynb"
+# start = pd.to_datetime('July 20, 2011')
+# end = pd.to_datetime('July 24, 2021')
+# cadence = 86400 # 1d
+# len(pd.date_range(start, end, freq='{}s'.format(cadence)))
+# -
+
+# Historical data apparently batches automatically, while cbpro does not.
+#
+# We could poll at a lower cadence and keep seperate file cadences based on that.
+
+# + active="ipynb"
+# hist = HistoricalData('BTC-USD',
+#               cadence,
+#               start.strftime('%Y-%m-%d-%H-%M'),
+#               end.strftime('%Y-%m-%d-%H-%M'),
+#               ).retrieve_data()
