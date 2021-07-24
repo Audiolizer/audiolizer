@@ -33,17 +33,29 @@ from datetime import datetime
 def get_timezones(url):
     return [dict(label=v, value=v) for v in pytz.all_timezones]
 
-
+valid_granularities = [60, 300, 900, 3600, 21600, 86400]
 granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300)) # seconds
 
 # see api for valid intervals https://docs.pro.coinbase.com/#get-historic-rates
-assert granularity in [60, 300, 900, 3600, 21600, 86400]
+assert granularity in valid_granularities
 
 audiolizer_temp_dir = os.environ.get('AUDIOLIZER_TEMP', './history')
 logger.info('audiolizer temp data: {}'.format(audiolizer_temp_dir))
 
 max_age = pd.Timedelta(os.environ.get('AUDIOLIZER_MAX_AGE', '5m'))
 logger.info('audiolizer max daily age {}'.format(max_age))
+
+def get_granularity(cadence):
+    """Get query granularity for the current cadence
+        
+    We need the query granularity to be within the valid granularities
+    The cadence needs to be a multiple of the granularity
+    """
+    dt = pd.Timedelta(cadence).total_seconds()
+    for _ in valid_granularities[::-1]:
+        if (_ <= dt) & (dt%_ == 0):
+            return _
+    raise NotImplementedError('cannot find granularity for cadence {}'.format(cadence))
 
 def refactor(df, frequency='1W'):
     """Refactor/rebin the data to a lower cadence
@@ -96,9 +108,9 @@ def write_data(df, ticker, granularity):
         tstr = t.strftime('%Y-%m-%d-%H-%M')
         fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
                 ticker, granularity, t.strftime('%Y-%m-%d'))
-        if len(day) > 1:
-            day.to_csv(fname, compression='gzip')
-            logger.info('wrote {}'.format(fname))
+#         if len(day) > 1:
+        day.to_csv(fname, compression='gzip')
+        logger.info('wrote {}'.format(fname))
         
 def fetch_missing(files_status, ticker, granularity):
     """Iterate over batches of missing dates"""
@@ -154,7 +166,10 @@ def get_today_GMT():
 # * 2021-07-14 00:00:00 -> 2021-07-21 04:07:22.738431
 
 # + active="ipynb"
-# files_status = get_files_status('BTC-USD', pd.to_datetime('2021-07-14 00:00:00'), pd.to_datetime('2021-07-21 04:07:22.738431'))
+# files_status = get_files_status('BTC-USD',
+#                                 granularity,
+#                                 pd.to_datetime('2021-07-14 00:00:00'),
+#                                 pd.to_datetime('2021-07-21 04:07:22.738431'))
 #
 # files_status
 
@@ -192,7 +207,7 @@ def get_age(fname):
     return pd.Timestamp.now() - datetime.fromtimestamp(mtime)
 
         
-def get_history(ticker, start_date, end_date = None, granularity=granularity):
+def get_history(ticker, granularity, start_date, end_date = None):
     """Fetch/load historical data from Coinbase API at specified granularity
     
     Data loaded from start_date through end of end_date
@@ -234,7 +249,6 @@ def get_history(ticker, start_date, end_date = None, granularity=granularity):
     df = pd.concat(map(lambda file: pd.read_csv(file, index_col='time', parse_dates=True, compression='gzip'),
                          files_status.files)).drop_duplicates()
 
-
     if end_date == today:
         logger.info('end date is today!')
         # check age of today's data. If it's old, fetch the new one
@@ -259,10 +273,18 @@ def get_history(ticker, start_date, end_date = None, granularity=granularity):
 
 # + active="ipynb"
 # hist = get_history('BTC-USD',
+#                    granularity,
 #                    '07/21/2021',
 # #                   pd.Timestamp.now().tz_localize(None)-pd.Timedelta('3D'),
 #                   )
 # hist
+
+# + active="ipynb"
+# hist = get_history('BTC-USD',
+#                    get_granularity('1d'),
+#                    '07/21/2015',
+# #                   pd.Timestamp.now().tz_localize(None)-pd.Timedelta('3D'),
+#                   )
 
 # + active="ipynb"
 # from audiolizer import candlestick_plot

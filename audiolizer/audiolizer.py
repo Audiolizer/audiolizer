@@ -28,7 +28,7 @@ import numpy as np
 import os
 from plotly.offline import plot
 
-from history import get_history, get_today_GMT
+from history import get_history, get_today_GMT, get_granularity
 
 # +
 from dash.exceptions import PreventUpdate
@@ -374,9 +374,9 @@ def play(base, quote, start, end, cadence, log_freq_range,
     if len(cleared) > 0:
         logger.info('cleared {} price files'.format(len(cleared)))
     logger.info('start, end {} {}'.format(start, end))
+    granularity = get_granularity(cadence)
     try:
-        # new = get_history(ticker, timezone, start, end)
-        new = get_history(ticker, start, end)
+        new = get_history(ticker, granularity, start, end)
     except:
         logger.info('cannot get history for {} {} {}'.format(ticker, start, end))
         raise
