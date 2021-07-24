@@ -1,4 +1,11 @@
-### clock-out
+
+### 2021-07-24 12:49:30.340861: clock-in
+
+### 2021-07-22 23:40:16-04:00: clock-out
+
+* had to fix bug in hourly to support clocking in with time adjustment combined with message
+* Audio based qr codes for machine-to-machine communication. non-human frequencies?
+* 3d printing for brail
 
 ### 2021-07-22 22:18:35.634973: clock-in: T-1h meeting with Gary, audio-markets.com working
 
