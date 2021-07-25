@@ -22,6 +22,12 @@ fhandler.setFormatter(formatter)
 logger.addHandler(fhandler)
 logger.setLevel(logging.DEBUG)
 
+# + active="ipynb"
+# import logging
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+# logging.debug("test")
+
 # +
 import pytz
 
@@ -56,6 +62,13 @@ def get_granularity(cadence):
         if (_ <= dt) & (dt%_ == 0):
             return _
     raise NotImplementedError('cannot find granularity for cadence {}'.format(cadence))
+
+def file_cadence(granularity):
+    """Set the resolution of the file"""
+    if granularity < 60*60*24:
+        return '1D'
+    else:
+        return '1M'    
 
 def refactor(df, frequency='1W'):
     """Refactor/rebin the data to a lower cadence
@@ -104,13 +117,13 @@ def fetch_data(ticker, granularity, start_, end_):
 
 
 def write_data(df, ticker, granularity):
-    for t, day in df.groupby(pd.Grouper(freq='1D')):
+    for t, group in df.groupby(pd.Grouper(freq='1D')):
         tstr = t.strftime('%Y-%m-%d-%H-%M')
         fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
                 ticker, granularity, t.strftime('%Y-%m-%d'))
-#         if len(day) > 1:
-        day.to_csv(fname, compression='gzip')
-        logger.info('wrote {}'.format(fname))
+        if len(group) > 1:
+            group.to_csv(fname, compression='gzip')
+            logger.info('wrote {}'.format(fname))
         
 def fetch_missing(files_status, ticker, granularity):
     """Iterate over batches of missing dates"""
@@ -148,6 +161,13 @@ def get_files_status(ticker, granularity, start_date, end_date):
     return files_status
 
 
+# + active="ipynb"
+# files_status = get_files_status('BTC-USD',
+#                                 300,
+#                                 pd.to_datetime('2021-07-14 00:00:00'),
+#                                 pd.to_datetime('2021-07-21 04:07:22.738431'))
+#
+# files_status
 # -
 
 def get_today_GMT():
@@ -164,14 +184,6 @@ def get_today_GMT():
 # * getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 03:50:49.619707
 # * INFO:history:getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 04:07:48.872110
 # * 2021-07-14 00:00:00 -> 2021-07-21 04:07:22.738431
-
-# + active="ipynb"
-# files_status = get_files_status('BTC-USD',
-#                                 granularity,
-#                                 pd.to_datetime('2021-07-14 00:00:00'),
-#                                 pd.to_datetime('2021-07-21 04:07:22.738431'))
-#
-# files_status
 
 # + active="ipynb"
 # for batch, g in files_status[files_status.found==0].groupby('batch', sort=False):
@@ -245,7 +257,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
     
     if len(files_status) == 0:
         raise IOError('Could not get file status for {}'.format(ticker, start_date, end_date))
-        
+
     df = pd.concat(map(lambda file: pd.read_csv(file, index_col='time', parse_dates=True, compression='gzip'),
                          files_status.files)).drop_duplicates()
 
@@ -273,24 +285,22 @@ def get_history(ticker, granularity, start_date, end_date = None):
 
 # + active="ipynb"
 # hist = get_history('BTC-USD',
-#                    granularity,
-#                    '07/21/2021',
+#                    60*60*24,
+#                    pd.to_datetime('2021-07-20'),
+#                    pd.to_datetime('2021-07-25'),
 # #                   pd.Timestamp.now().tz_localize(None)-pd.Timedelta('3D'),
 #                   )
-# hist
-
-# + active="ipynb"
-# hist = get_history('BTC-USD',
-#                    get_granularity('1d'),
-#                    '07/21/2015',
-# #                   pd.Timestamp.now().tz_localize(None)-pd.Timedelta('3D'),
-#                   )
+# hist.head()
 
 # + active="ipynb"
 # from audiolizer import candlestick_plot
 # from plotly import graph_objs as go
-
-# + active="ipynb"
+#
+# from plotly.offline import init_notebook_mode
+# init_notebook_mode(connected=True)
+#
+# # candlestick_plot(refactor(hist, '7D'), 'BTC', 'USD')
+#
 # candlestick_plot(hist, 'BTC', 'USD')
 # -
 
