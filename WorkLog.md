@@ -1,3 +1,5 @@
+### 2021-07-25 00:00:18.150461: clock-out: T-1h 
+
 * resolving data gaps
 
 ### 2021-07-24 21:10:36.285458: clock-in
