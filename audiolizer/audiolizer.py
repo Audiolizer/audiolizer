@@ -19,9 +19,9 @@ logging.basicConfig(filename='audiolizer.log')
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
-
-logger.info("hey")
 # -
+
+import time
 
 import pandas as pd
 import numpy as np
@@ -361,25 +361,53 @@ def play(base, quote, start, end, cadence, log_freq_range,
          price_type,
          # timezone,
          ):
+    t0 = time.perf_counter()
     # logger.info('timezone = {}'.format(timezone))
     ticker = '{}-{}'.format(base, quote)
     logger.info('ticker: {}'.format(ticker))
     cleared = clear_files('assets/*.wav', max_storage=wav_threshold*1e6)
     if len(cleared) > 0:
         logger.info('cleared {} wav files'.format(len(cleared)))
+        
+    t1 = time.perf_counter()
+    logger.info('time to clear wav {}'.format(t1-t0))
+    t0 = t1
+        
     cleared = clear_files('assets/*.midi', max_storage=midi_threshold*1e6)
     if len(cleared) > 0:
         logger.info('cleared {} midi files'.format(len(cleared)))
+        
+    t1 = time.perf_counter()
+    logger.info('time to clear midi {}'.format(t1-t0))
+    t0 = t1
+        
     cleared = clear_files('history/*.csv.gz', max_storage=price_threshold*1e6)
     if len(cleared) > 0:
         logger.info('cleared {} price files'.format(len(cleared)))
+        
+    t1 = time.perf_counter()
+    logger.info('time to clear price {}'.format(t1-t0))
+    t0 = t1
+        
+        
     logger.info('start, end {} {}'.format(start, end))
     granularity = get_granularity(cadence)
+    
+    
+    t1 = time.perf_counter()
+    logger.info('time to init play {}'.format(t1-t0))
+    t0 = t1
+    
     try:
         new = get_history(ticker, granularity, start, end)
     except:
         logger.info('cannot get history for {} {} {}'.format(ticker, start, end))
         raise
+        
+    t1 = time.perf_counter()
+    logger.info('time to get history {}'.format(t1-t0))
+    t0 = t1
+    
     start_, end_ = new.index[[0, -1]]
 
     if (end_-start_).days == 1:
@@ -417,6 +445,10 @@ def play(base, quote, start, end, cadence, log_freq_range,
 
     play_time = ''
 
+    t1 = time.perf_counter()
+    logger.info('time to set midi params {}'.format(t1-t0))
+    t0 = t1
+    
     if selectedData is not None:
         start_select, end_select = selectedData['range']['x']
         # need the number of beats from beginning to start_select
@@ -427,6 +459,10 @@ def play(base, quote, start, end, cadence, log_freq_range,
 #         logger.info('selected start, end time, total time:', start_time, end_time, total_time)
         play_time = '#t={},{}'.format(start_time, end_time)
 #         logger.info(start_select, end_select, play_time)
+
+    t1 = time.perf_counter()
+    logger.info('time setup selectedData {}'.format(t1-t0))
+    t0 = t1
 
     new_ = refactor(new[start_:end_], cadence)
     logger.info('{}->{}'.format(*new_.index[[0,-1]]))
@@ -445,8 +481,12 @@ def play(base, quote, start, end, cadence, log_freq_range,
 
     amp_min = beat_quantile/100 # threshold amplitude to merge beats
     min_vol = new_.volume.quantile(drop_quantile/100)
-
+    
     beeps = []
+    t1 = time.perf_counter()
+    logger.info('time to set up beeps {}'.format(t1-t0))
+    t0 = t1
+    
     for t, (price, volume_) in new_[[price_type, 'volume']].iterrows():
         if ~np.isnan(price):
             freq_ = get_frequency(price, min_price, max_price, log_freq_range)
@@ -469,16 +509,27 @@ def play(base, quote, start, end, cadence, log_freq_range,
         if silence:
             beeps = quiet(beeps, min_vol/max_vol)
 
-#     logger.info(mode, 'unique frequencies:', len(np.unique([_[0] for _ in beeps])))
 
+    t1 = time.perf_counter()
+    logger.info('time to generate audio {}'.format(t1-t0))
+    t0 = t1
+    
     audio = [beeper(*beep) for beep in beeps]
-
+    
+    t1 = time.perf_counter()
+    logger.info('time to generate beeps {}'.format(t1-t0))
+    t0 = t1
+    
     with open('assets/'+fname, "wb") as f:
         audiogen_p3.sampler.write_wav(f, itertools.chain(*audio))
 
 
     write_midi(beeps, tempo, 'assets/' + midi_file)
 
+    t1 = time.perf_counter()
+    logger.info('time to write audio data {}'.format(t1-t0))
+    t0 = t1
+    
     return (candlestick_plot(new_, base, quote),
             app.get_asset_url(fname)+play_time, midi_asset, midi_asset, '')
 
@@ -494,6 +545,3 @@ if __name__ == '__main__':
         dev_tools_hot_reload=False,
         extra_files=['../audiolizer.yaml']
         )
-# -
-
-

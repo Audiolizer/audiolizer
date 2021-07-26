@@ -1,3 +1,4 @@
+* adding profiler info
 * fixed data gap caused by end date writing
 
 ### 2021-07-25 23:48:43.945245: clock-in
