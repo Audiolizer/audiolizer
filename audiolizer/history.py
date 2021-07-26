@@ -117,13 +117,17 @@ def fetch_data(ticker, granularity, start_, end_):
 
 
 def write_data(df, ticker, granularity):
+    """write data grouped by date
+    
+    Note: data gaps will result if a partial day provided.
+    Make sure data is complete before passing to this function
+    """
     for t, group in df.groupby(pd.Grouper(freq='1D')):
         tstr = t.strftime('%Y-%m-%d-%H-%M')
         fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
                 ticker, granularity, t.strftime('%Y-%m-%d'))
-        if len(group) > 1:
-            group.to_csv(fname, compression='gzip')
-            logger.info('wrote {}'.format(fname))
+        group.to_csv(fname, compression='gzip')
+        logger.info('wrote {}'.format(fname))
         
 def fetch_missing(files_status, ticker, granularity):
     """Iterate over batches of missing dates"""
@@ -134,7 +138,7 @@ def fetch_missing(files_status, ticker, granularity):
         endpoints = [t.strftime('%Y-%m-%d-%H-%M') for t in [t1, t2]]
         logger.info('fetching {}, {}'.format(len(g), endpoints))
         df = fetch_data(ticker, granularity, *endpoints).loc[t1:t2] # only grab data between endpoints
-        write_data(df, ticker, granularity)
+        write_data(df[df.index < t2], ticker, granularity)
 
         
 def get_files_status(ticker, granularity, start_date, end_date):
@@ -184,15 +188,6 @@ def get_today_GMT():
 # * getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 03:50:49.619707
 # * INFO:history:getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 04:07:48.872110
 # * 2021-07-14 00:00:00 -> 2021-07-21 04:07:22.738431
-
-# + active="ipynb"
-# for batch, g in files_status[files_status.found==0].groupby('batch', sort=False):
-#     t1, t2 = g.iloc[[0, -1]].index
-#     # extend by 1 day whether or not t1 == t2
-#     t2 += pd.Timedelta('1D')
-#     endpoints = [t.strftime('%Y-%m-%d-%H-%M') for t in [t1, t2]]
-#     print('fetching {}, {}'.format(len(g), endpoints))
-#     df = fetch_data('BTC-USD', granularity, *endpoints)
 
 # +
 def get_today(ticker, granularity):
@@ -251,7 +246,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
     
     assert start_date <= end_date
     
-    logger.info('getting {} files status: {} -> {}'.format(ticker, start_date, end_date))
+    logger.info('getting {} {}s files status: {} -> {}'.format(ticker, granularity, start_date, end_date))
     files_status = get_files_status(ticker, granularity, start_date, end_date)
     fetch_missing(files_status, ticker, granularity)
     
@@ -280,17 +275,12 @@ def get_history(ticker, granularity, start_date, end_date = None):
         df = pd.concat([df, today_data]).drop_duplicates()
     return df
 
-# + active="ipynb"
-# to = get_today('BTC-USD', 300)
 
 # + active="ipynb"
-# hist = get_history('BTC-USD',
-#                    60*60*24,
-#                    pd.to_datetime('2021-07-20'),
-#                    pd.to_datetime('2021-07-25'),
-# #                   pd.Timestamp.now().tz_localize(None)-pd.Timedelta('3D'),
-#                   )
-# hist.head()
+# to = get_today('BTC-USD', 300)
+# -
+
+hist = get_history('BTC-USD', 300, '2021-07-20', '2021-07-26')
 
 # + active="ipynb"
 # from audiolizer import candlestick_plot
