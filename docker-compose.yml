@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   audiolizer:
-    image: apembroke/audiolizer:0.4.5
+    image: apembroke/audiolizer:0.4.6
     ports:
       - "80:5000"
     environment:
