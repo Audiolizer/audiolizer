@@ -275,12 +275,11 @@ def get_history(ticker, granularity, start_date, end_date = None):
         df = pd.concat([df, today_data]).drop_duplicates()
     return df
 
-
 # + active="ipynb"
 # to = get_today('BTC-USD', 300)
-# -
 
-hist = get_history('BTC-USD', 300, '2021-07-20', '2021-07-26')
+# + active="ipynb"
+# hist = get_history('BTC-USD', 300, '2021-07-20', '2021-07-26')
 
 # + active="ipynb"
 # from audiolizer import candlestick_plot
