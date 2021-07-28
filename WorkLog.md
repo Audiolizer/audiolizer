@@ -1,3 +1,4 @@
+* fixed data gap from writting end date
 
 ### 2021-07-27 22:27:42.834487: clock-in
 

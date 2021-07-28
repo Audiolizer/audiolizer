@@ -167,9 +167,9 @@ def get_files_status(ticker, granularity, start_date, end_date):
 
 # + active="ipynb"
 # files_status = get_files_status('BTC-USD',
-#                                 300,
-#                                 pd.to_datetime('2021-07-14 00:00:00'),
-#                                 pd.to_datetime('2021-07-21 04:07:22.738431'))
+#                                 300, # 2021-07-27 00:00:00 -> 2021-07-29 00:00:00
+#                                 pd.to_datetime('2021-07-27 00:00:00'),
+#                                 pd.to_datetime('2021-07-29 00:00:00'))
 #
 # files_status
 # -
@@ -180,10 +180,6 @@ def get_today_GMT():
     today = system_time.tz_convert('GMT').tz_localize(None)
     return today
 
-
-# + active="ipynb"
-# get_today_GMT()
-# -
 
 # * getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 03:50:49.619707
 # * INFO:history:getting BTC-USD files status: 2021-07-20 00:00:00 -> 2021-07-21 04:07:48.872110
@@ -235,7 +231,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
 
     if end_date is None:
         # don't include today
-        end_date = today
+        end_date = today + pd.Timedelta('1d')
         logger.info('no end_date provided, using {}'.format(end_date))
     else:
         # convert the user-specified date and timezone to GMT
@@ -248,6 +244,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
     
     logger.info('getting {} {}s files status: {} -> {}'.format(ticker, granularity, start_date, end_date))
     files_status = get_files_status(ticker, granularity, start_date, end_date)
+    files_status = files_status[files_status.index < pd.to_datetime(today.date())]
     fetch_missing(files_status, ticker, granularity)
     
     if len(files_status) == 0:
