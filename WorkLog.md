@@ -1,3 +1,10 @@
+* start9 on ch
+* getting `0.0.0.0:80 failed (13: Permission denied)` from nginx
+* https://github.com/tiangolo/meinheld-gunicorn-flask-docker how to ssl?
+* fastapi-dash https://github.com/rusnyder/fastapi-plotly-dash
+* nice compose file for nginx 
+
+https://github.com/docker/awesome-compose/tree/master/nginx-wsgi-flask
 
 ### 2021-07-27 18:53:57.558991: clock-in
 
