@@ -1,3 +1,5 @@
+### 2021-07-27 20:49:35.835828: clock-out
+
 * start9 on ch
 * getting `0.0.0.0:80 failed (13: Permission denied)` from nginx
 * https://github.com/tiangolo/meinheld-gunicorn-flask-docker how to ssl?
