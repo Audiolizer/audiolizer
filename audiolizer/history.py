@@ -253,7 +253,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
     df = pd.concat(map(lambda file: pd.read_csv(file, index_col='time', parse_dates=True, compression='gzip'),
                          files_status.files)).drop_duplicates()
 
-    if end_date == today:
+    if end_date >= today:
         logger.info('end date is today!')
         # check age of today's data. If it's old, fetch the new one
         today_fname = audiolizer_temp_dir + '/{}-today.csv.gz'.format(ticker)
