@@ -1,14 +1,33 @@
-version: "3.2"
+version: "3.7"
 
 services:
+  nginx-proxy:
+    build: nginx
+    restart: always
+    volumes:
+      - ./nginx/default.conf:/tmp/default.conf
+    environment: 
+      - FLASK_SERVER_ADDR=audiolizer:8000
+    ports:
+      - "80:80"
+    depends_on:
+      - audiolizer
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail localhost:80/health-check || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    command: /app/start.sh
+
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+
   audiolizer:
-    image: apembroke/audiolizer:0.4.7
+    image: apembroke/audiolizer:0.4.8
     ports:
-      - "80:5000"
+      - "8000:5000"
     environment:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
     command: ["gunicorn", "--workers=4", "--bind", "0.0.0.0:5000", "audiolizer:server"]
@@ -17,7 +36,7 @@ services:
         source: ${PWD}
         target: /home/audiolizer
     working_dir: /home/audiolizer/audiolizer
-#dev config
+
   audiolizer-dev:
     image: apembroke/audiolizer:latest
     ports:
