@@ -1,3 +1,6 @@
+### 2021-07-29 23:27:40.687115: clock-out: T-1h 
+
+* pine scripting language https://www.tradingview.com/pine-script-reference/
 
 ### 2021-07-29 20:29:14.493674: clock-in
 
