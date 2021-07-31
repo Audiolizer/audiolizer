@@ -1,3 +1,5 @@
+### 2021-07-31 16:23:56.168670: clock-out
+
 * got ssl working outside nginx
 * moving nginx out
 * https://github.com/JonasAlfredsson/docker-nginx-certbot/
