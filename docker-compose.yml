@@ -1,24 +1,6 @@
 version: "3.7"
 
 services:
-  # nginx-proxy:
-  #   build: nginx
-  #   restart: always
-  #   volumes:
-  #     - ./nginx/default.conf:/tmp/default.conf
-  #   environment: 
-  #     - FLASK_SERVER_ADDR=audiolizer:8000
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - audiolizer
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl --silent --fail localhost:80/health-check || exit 1"]
-  #     interval: 10s
-  #     timeout: 10s
-  #     retries: 3
-  #   command: /app/start.sh
-
   # redis:
   #   image: "redis:alpine"
   #   ports:
@@ -51,5 +33,3 @@ services:
         source: ${PWD}
         target: /home/audiolizer
     working_dir: /home/audiolizer/audiolizer
-
-        

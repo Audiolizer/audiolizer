@@ -1,3 +1,5 @@
+* moving nginx out
+* https://github.com/JonasAlfredsson/docker-nginx-certbot/
 
 ### 2021-07-31 13:12:41.014304: clock-in
 
