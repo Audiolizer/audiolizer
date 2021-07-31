@@ -1,3 +1,4 @@
+* got ssl working outside nginx
 * moving nginx out
 * https://github.com/JonasAlfredsson/docker-nginx-certbot/
 
