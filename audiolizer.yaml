@@ -177,16 +177,16 @@ date_settings:
                 id: date-select
                 options:
                   - label: '1D'
-                    value: '24H-20T'
+                    value: '24H-15T'
                   - label: '1W'
-                    value: '1W-3H'
+                    value: '1W-4H'
                   - label: '1M'
                     value: '30D-1D'
                   - label: '6M'
                     value: '180D-1D'
                   - label: '1Y'
                     value: '365D-7D'
-                value: '24H-20T'
+                value: '24H-15T'
                 inline: True
   - dbc.Row:
       children:
@@ -213,12 +213,12 @@ date_settings:
                     value: 7D
                   - label: daily
                     value: 1D
-                  - label: 3hour
-                    value: 3H
+                  - label: 4hour
+                    value: 4H
                   - label: 1hour
                     value: 1H
-                  - label: 20m
-                    value: 20T
+                  - label: 15m
+                    value: 15T
                 required: True
                 value: 7D
                 bs_size: lg
