@@ -1,3 +1,4 @@
+* pushing 0.4.10
 * changing default candlesticks
 
 ### 2021-07-31 19:14:59.872954: clock-in
