@@ -1,3 +1,6 @@
+
+### 2021-07-31 19:14:59.872954: clock-in
+
 ### 2021-07-31 16:23:56.168670: clock-out
 
 * got ssl working outside nginx
