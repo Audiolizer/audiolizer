@@ -1,3 +1,5 @@
+* got test midi element running
+* render sheet music from midi like this https://github.com/cifkao/html-midi-player
 
 ### 2021-08-04 22:07:25.286142: clock-in: T-19m 
 
