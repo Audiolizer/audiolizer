@@ -1,3 +1,9 @@
+* added midi dropdowns
+feedback from Fox
+
+* remove rests - it hides information
+* use constant volume - difficult to perceive volume changes
+* major/minor scales for a given sequence
 
 ### 2021-08-14 01:54:57.173140: clock-in
 

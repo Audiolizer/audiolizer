@@ -30,6 +30,8 @@ from plotly.offline import plot
 
 from history import get_history, get_today_GMT, get_granularity
 
+from midi_loader import instruments, instrument_paths, instrument_pitches
+
 # +
 from dash.exceptions import PreventUpdate
 
@@ -545,3 +547,6 @@ if __name__ == '__main__':
         dev_tools_hot_reload=False,
         extra_files=['../audiolizer.yaml']
         )
+# -
+
+
