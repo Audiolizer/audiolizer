@@ -11,6 +11,7 @@ app:
       - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
+      - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
     title: Market Audiolizer
     suppress_callback_exceptions: True
 
@@ -53,7 +54,7 @@ nav:
                           children:
                             html.H6: How It Works
                           # className: ml-3
-          href: https://asherp.github.io/audiolizer/About/
+          href: https://audiolizer.github.io/audiolizer/
     dark: True
 
 player_settings:
@@ -234,6 +235,18 @@ date_settings:
         #         required: True
         #         value: GMT
         #         bs_size: lg
+
+instrument_settings:
+  - dcc.Dropdown:
+      id: category
+      clearable: False
+  - dcc.Dropdown:
+      id: instrument-type
+      clearable: False
+  - dcc.Dropdown:
+      id: instrument
+      clearable: False
+
 scale_settings:
   - dbc.Row:
       children:
@@ -280,7 +293,7 @@ duration_settings:
             id: drop-quantile
             min: 0
             max: 100
-            value: 25
+            value: 0
             label: rest quantile
     - dbc.Col:
         width: 4
@@ -289,7 +302,7 @@ duration_settings:
             id: beat-quantile
             min: 0
             max: 100
-            value: 75
+            value: 0
             label: beat quantile
     - dbc.Col:
         width: 4
@@ -363,6 +376,13 @@ layout:
               lg: 6
               xl: 3
               children: ${date_settings}
+          - dbc.Col:
+              xs: 12
+              sm: 12
+              md: 6
+              lg: 6
+              xl: 3
+              children: ${instrument_settings}
           - dbc.Col:
               xs: 12
               sm: 12
@@ -494,10 +514,39 @@ callbacks:
       - id: frequency-drag
         attr: marks
 
+  choose_category:
+    input:
+      - id: url
+        attr: pathname
+    output:
+      - id: category
+        attr: options
+      - id: category
+        attr: value
+    callback: midi_loader.fetch_instrument_categories
 
-# @app.callback(
-#     Output('selected-data', 'children'),
-#     Input('basic-interactions', 'selectedData'))
-# def display_selected_data(selectedData):
-#     return json.dumps(selectedData, indent=2)
+  choose_instrument_types:
+    input:
+      - id: category
+        attr: value
+    output:
+      - id: instrument-type
+        attr: options
+      - id: instrument-type
+        attr: value
+    callback: midi_loader.fetch_instrument_types
+
+  choose_instrument:
+    input:
+      - id: category
+        attr: value
+      - id: instrument-type
+        attr: value
+    output:
+      - id: instrument
+        attr: options
+      - id: instrument
+        attr: value
+    callback: midi_loader.fetch_instruments
+
 

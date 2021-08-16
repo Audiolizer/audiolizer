@@ -473,7 +473,10 @@ def play(base, quote, start, end, cadence, log_freq_range,
 
     if os.path.exists(fname):
         return (candlestick_plot(new_, base, quote),
-                app.get_asset_url(fname)+play_time, midi_asset, midi_asset, midi_asset)
+                app.get_asset_url(fname)+play_time,
+                midi_asset,
+                midi_asset,
+                midi_asset)
 
 #     assert get_beats(*new_.index[[0,-1]], cadence) == len(new_)
 
@@ -533,7 +536,10 @@ def play(base, quote, start, end, cadence, log_freq_range,
     t0 = t1
     
     return (candlestick_plot(new_, base, quote),
-            app.get_asset_url(fname)+play_time, midi_asset, midi_asset, '')
+            app.get_asset_url(fname)+play_time,
+            midi_asset,
+            midi_asset,
+            '')
 
 server = app.server
 
