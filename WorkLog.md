@@ -1,3 +1,6 @@
+
+# 2021-08-16 13:37:51.947884: clock-in
+
 * instrument dropdowns
 ### 2021-08-15 17:47:41.505140: clock-out: T-17h 
 
