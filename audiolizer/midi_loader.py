@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.11.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -136,3 +136,5 @@ def fetch_instruments(cat, instrument_type):
     instruments_ = list(instruments[cat][instrument_type])
     first_inst = instruments_[0]
     return [dict(label=_, value=_) for _ in instruments_], first_inst
+
+# %%
