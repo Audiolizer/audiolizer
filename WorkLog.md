@@ -1,3 +1,5 @@
+# 2021-08-21 12:38:57.104262: clock-out
+
 * midi sequence prototyping
 * fixed dependencies
 
