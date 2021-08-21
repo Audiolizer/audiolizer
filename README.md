@@ -16,9 +16,13 @@ Visit the documenation site to learn [how it works](https://asherp.github.io/aud
 * pandas
 * plotly
 * Historic-Crypto (pip)
-* pyaudio (conda)
-* audiogen (pip)
-* psidash `pip install git+git@github.com:predsci/psidash.git`
+* PyAudio==0.2.11 (conda)
+* audiogen_p3 pip install audiogen_p3
+* MIDIUtil==1.2.1 (pip)
+* psidash `pip install git+https://github.com/predsci/psidash.git`
+* dash bootstrap components `pip install dash-bootstrap-components`
+* dash audio components (wav) `pip install dash-audio-components`
+* dash daq `pip install dash-daq`
 
 docs dependences (optional)
 

@@ -1,3 +1,4 @@
+* fixed dependencies
 
 # 2021-08-21 11:54:36.168205: clock-in
 
