@@ -11,7 +11,11 @@ app:
       - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
+    external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
+      - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
+      - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
+
     title: Market Audiolizer
     suppress_callback_exceptions: True
 
@@ -103,6 +107,13 @@ player_settings:
         lg: 3
         xl: 3
       children:
+        - html.Button:
+            id: stop
+            n_clicks: 0
+            children: stop
+        - html.Div:
+            id: stop-clicks
+
         # - html.H4: Cache settings
         # - dbc.Row:
         #     children:
@@ -246,6 +257,12 @@ instrument_settings:
   - dcc.Dropdown:
       id: instrument
       clearable: False
+  - html.Div:
+      id: path
+      children: hey
+  - html.Div:
+      id: out-component
+      children: 'True'
 
 scale_settings:
   - dbc.Row:
@@ -353,6 +370,10 @@ pitch_settings:
               value: True
               labelPosition: bottom
 
+storage:
+  dcc.Store:
+    id: midi-data
+
 layout:
   dbc.Container:
     fluid: True
@@ -413,6 +434,10 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+    - ${storage}
+    - html.Div:
+        id: data_dump
+
 callbacks:
   update_base_options:
     input:
@@ -457,7 +482,8 @@ callbacks:
   #     - id: timezone
   #       attr: options
   #   callback: history.get_timezones
-  play:
+
+  play_wav:
     input:
       - id: base
         attr: value
@@ -506,6 +532,9 @@ callbacks:
         attr: download
       - id: loading-output
         attr: children
+      - id: midi-data
+        attr: data
+
   slider_marks:
     input:
       - id: url

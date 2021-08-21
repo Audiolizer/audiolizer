@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.11.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -67,16 +67,16 @@ import audiogen_p3
 import itertools
 import sys
 
-def beeper(freq, amplitude = 1):
-    return (amplitude*_ for _ in audiogen_p3.beep(freq))
+# def beeper(freq, amplitude = 1):
+#     return (amplitude*_ for _ in audiogen_p3.beep(freq))
 
-try:
-    audiogen_p3.sampler.play(itertools.chain(
-        *[beeper(100*(1+i), 1./(1+i)) for i in range(8)]
-    ))
-except:
-    logger.warning('could not play sampler')
-    pass
+# try:
+#     audiogen_p3.sampler.play(itertools.chain(
+#         *[beeper(100*(1+i), 1./(1+i)) for i in range(8)]
+#     ))
+# except:
+#     logger.warning('could not play sampler')
+#     pass
 # -
 
 import dash_html_components as html
@@ -290,6 +290,14 @@ def clear_files(fname_glob="assets/*.wav", max_storage=10e6):
     return []
 
 
+# -
+
+from dash.dependencies import Input, Output, ClientsideFunction
+
+import math
+
+import json
+
 # +
 
 conf = load_conf('../audiolizer.yaml')
@@ -354,7 +362,21 @@ def update_date_range(date_select,
     initial_visible_month = start_date
     return date_range_start, date_range_end, cadence, initial_visible_month
 
-@callbacks.play
+def get_sequence(beeps):
+    """sequence data for midi playback"""
+    t = 0
+    sequence = defaultdict(list)
+    #  freq_, volume_/max_vol, duration
+    for freq_, vol, dur in beeps:
+        sequence['when'].append(t)
+        sequence['pitch'].append(int(math.floor(freq_)))
+        sequence['duration'].append(dur)
+        sequence['volume'].append(.5)
+        t += dur
+    return sequence
+
+
+@callbacks.play_wav
 def play(base, quote, start, end, cadence, log_freq_range,
          mode, drop_quantile, beat_quantile,
          tempo, toggle_merge, silence,
@@ -476,7 +498,9 @@ def play(base, quote, start, end, cadence, log_freq_range,
                 app.get_asset_url(fname)+play_time,
                 midi_asset,
                 midi_asset,
-                midi_asset)
+                midi_asset,
+                dict(),
+               )
 
 #     assert get_beats(*new_.index[[0,-1]], cadence) == len(new_)
 
@@ -539,7 +563,34 @@ def play(base, quote, start, end, cadence, log_freq_range,
             app.get_asset_url(fname)+play_time,
             midi_asset,
             midi_asset,
-            '')
+            '',
+            get_sequence(beeps))
+
+@app.callback(
+    Output('path', 'children'),
+    Input('instrument', 'value'))
+def fetch_instrument_path(instrument_name):
+    return instrument_paths[instrument_name]
+
+@app.callback(
+    Output('data_dump', 'children'),
+    Input('midi-data', 'data'))
+def pass_thru(data):
+    return json.dumps(data)
+
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='stop'),
+    Output('stop-clicks', 'children'),
+    Input('stop', 'n_clicks'))
+
+
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='play'),
+    Output('out-component', 'children'),
+    Input('instrument', 'value'),
+    Input('path', 'children'),
+    Input('midi-data', 'data'))
+
 
 server = app.server
 
@@ -554,5 +605,4 @@ if __name__ == '__main__':
         extra_files=['../audiolizer.yaml']
         )
 # -
-
 

@@ -138,6 +138,7 @@ def send_notes(pitches, dur, vol):
         duration.append(dur)
         volume.append(vol)
     notes = dict(when=when, pitch=pitches, duration=duration, volume=volume)
+    print(notes)
     return notes
 
 
@@ -152,6 +153,7 @@ app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='stop'),
     Output('stop-clicks', 'children'),
     Input('stop', 'n_clicks'))
+
 
 
 
