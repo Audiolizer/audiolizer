@@ -1,3 +1,6 @@
+
+# 2021-08-21 11:54:36.168205: clock-in
+
 # 2021-08-19 09:30:23.024509: clock-out
 
 * added stop/play sequences
