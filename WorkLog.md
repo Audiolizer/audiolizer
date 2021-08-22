@@ -1,3 +1,6 @@
+
+# 2021-08-21 21:13:23.642095: clock-in
+
 # 2021-08-21 12:38:57.104262: clock-out
 
 * midi sequence prototyping
