@@ -1,3 +1,4 @@
+* multi-select among open close high low
 * merging
 * merge instrument loading
 

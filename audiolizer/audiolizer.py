@@ -459,7 +459,7 @@ def play(base, quote,
 
     fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
         ticker,
-        price_type,
+        '-'.join(price_type),
         start_.date(),
         end_.date(),
         cadence,
@@ -487,47 +487,51 @@ def play(base, quote,
     midi_asset = app.get_asset_url(midi_file)
 
     max_vol = new_.volume.max() # normalizes peak amplitude
-    min_price = new_[price_type].min() # sets lower frequency bound
-    max_price = new_[price_type].max() # sets upper frequency bound
+    min_price = new_[price_type].values.ravel().min() # sets lower frequency bound
+    max_price = new_[price_type].values.ravel().max() # sets upper frequency bound
 
     amp_min = beat_quantile/100 # threshold amplitude to merge beats
     min_vol = new_.volume.quantile(drop_quantile/100)
     
-    beeps = []
+    
     t1 = time.perf_counter()
     logger.info('time to set up beeps {}'.format(t1-t0))
     t0 = t1
-    
-    for t, (price, volume_) in new_[[price_type, 'volume']].iterrows():
-        if ~np.isnan(price):
-            freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-            freq_ = freq(pitch(freq_))
-            beep = midi_note(freq_), volume_/max_vol, duration
-            beeps.append(beep)
-        else:
-            freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-            beep = midi_note(freq_), 0, duration
-            beeps.append(beep)
-            logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
 
-    if toggle_merge:
-        beeps = merge_pitches(beeps, amp_min)
-    if silence:
-        beeps = quiet(beeps, min_vol/max_vol)
-        
     notes = defaultdict(list)
-    dur0 = 0
     max_freq_ = 0
     max_amp_ = 0
-    for freq_, amp_, dur_ in beeps:
-        notes['when'].append(dur0)
-        notes['pitch'].append(freq_)
-        notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
-        notes['volume'].append(1) # could use a constant amplitude
-        max_freq_ = max(max_freq_, freq_)
-        max_amp_ = max(max_amp_, amp_)
-        dur0 += duration
 
+    for price_type_ in price_type:
+        beeps = []
+        for t, (price, volume_) in new_[[price_type_, 'volume']].iterrows():
+            if ~np.isnan(price):
+                freq_ = get_frequency(price, min_price, max_price, log_freq_range)
+                freq_ = freq(pitch(freq_))
+                beep = midi_note(freq_), volume_/max_vol, duration
+                beeps.append(beep)
+            else:
+                freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
+                beep = midi_note(freq_), 0, duration
+                beeps.append(beep)
+                logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
+
+        if toggle_merge:
+            beeps = merge_pitches(beeps, amp_min)
+        if silence:
+            beeps = quiet(beeps, min_vol/max_vol)
+            
+        dur0 = 0
+        for freq_, amp_, dur_ in beeps:
+            notes['when'].append(dur0)
+            notes['pitch'].append(freq_)
+#             notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
+            notes['duration'].append(duration*1.5) # peak amp will get 4 beats
+            notes['volume'].append(1) # could use a constant amplitude
+            max_freq_ = max(max_freq_, freq_)
+            max_amp_ = max(max_amp_, amp_)
+            dur0 += duration
+            
 #     print('max frequency was {}'.format(max_freq_))
 #     print('max amp was {}'.format(max_amp_))
 
@@ -535,7 +539,8 @@ def play(base, quote,
     logger.info('time to generate audio {}'.format(t1-t0))
     t0 = t1
 
-    write_midi(beeps, tempo, 'assets/' + midi_file)
+    # need to rewrite for notes
+#     write_midi(beeps, tempo, 'assets/' + midi_file)
 
     t1 = time.perf_counter()
     logger.info('time to write audio data {}'.format(t1-t0))

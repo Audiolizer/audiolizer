@@ -237,7 +237,7 @@ scale_settings:
             size: 10
             offset: 1
           children:  
-          - dbc.RadioItems:
+          - dbc.Checklist:
               id: price_type
               options:
                 - label: open
@@ -248,7 +248,8 @@ scale_settings:
                   value: high
                 - label: low
                   value: low
-              value: close
+              value:
+                - close
               inline: True
 
 duration_settings:
