@@ -1,3 +1,5 @@
+# 2021-09-02 17:55:58.770527: clock-out: T-1h 
+
 * multi-select among open close high low
 * merging
 * merge instrument loading
