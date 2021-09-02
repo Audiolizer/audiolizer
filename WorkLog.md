@@ -1,3 +1,5 @@
+* merging
+* merge instrument loading
 
 # 2021-09-02 14:07:18.903429: clock-in
 
@@ -13,6 +15,14 @@
 
 # 2021-08-21 11:54:36.168205: clock-in
 
+# 2021-09-02 11:39:06.138201: clock-out
+
+* midi playback, fixed bug in today naming convention, volume based duration
+* should probably clone and serve webaudiofont locally
+* bug: today, tomonth, toweek, toyear should be separate csv (named after granularity)
+
+# 2021-09-02 08:50:28.487655: clock-in
+
 # 2021-08-19 09:30:23.024509: clock-out
 
 * added stop/play sequences
@@ -25,6 +35,7 @@
 # 2021-08-16 13:37:51.947884: clock-in
 
 * instrument dropdowns
+
 ### 2021-08-15 17:47:41.505140: clock-out: T-17h 
 
 

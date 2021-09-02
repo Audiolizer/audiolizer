@@ -15,7 +15,8 @@
 # %%
 from html.parser import HTMLParser
 import urllib
-from collections import defaultdict 
+from collections import defaultdict
+import os, json
 
 
 # %%
@@ -62,8 +63,7 @@ class MidiDrumParser(HTMLParser):
                     self.last_instrument = instrument_name
 
 
-drums = MidiDrumParser('https://surikov.github.io/webaudiofontdata/sound/drums_6_SBLive_sf2Brush.html')
-
+# drums = MidiDrumParser('https://surikov.github.io/webaudiofontdata/sound/drums_6_SBLive_sf2Brush.html')
 
 # %%
 class MidiIndexParser(HTMLParser):
@@ -111,10 +111,36 @@ class MidiIndexParser(HTMLParser):
         elif 'Drums' in data:
             self.last_instrument = 'Drums', ''
 
-midi_collection = MidiIndexParser()
-instruments = midi_collection.instruments
-instrument_paths = midi_collection.paths
-instrument_pitches = midi_collection.pitches
+
+# %%
+def load_instruments(fname):
+    if os.path.exists(fname):
+        with open(fname, 'r') as f:
+            return json.loads(f.read())
+    raise IOError
+
+def get_instruments():
+    instruments = load_instruments('instruments.json')
+    instrument_paths = load_instruments('instrument_paths.json')
+    instrument_pitches = load_instruments('instrument_pitches.json')
+
+    if instruments is None:
+        midi_collection = MidiIndexParser()
+        instruments = midi_collection.instruments
+        instrument_paths = midi_collection.paths
+        instrument_pitches = midi_collection.pitches
+
+        with open('instruments.json', 'w') as f:
+            f.write(json.dumps(instruments, indent='  '))
+
+        with open('instrument_paths.json', 'w') as f:
+            f.write(json.dumps(instrument_paths, indent='  '))
+
+        with open('instrument_pitches.json', 'w') as f:
+            f.write(json.dumps(instrument_pitches, indent='  '))
+    return instruments, instrument_paths, instrument_pitches
+
+instruments, instrument_paths, instrument_pitches = get_instruments()
 
 
 # %%
@@ -132,9 +158,21 @@ def fetch_instrument_types(cat):
 
 
 # %%
+def relabel_instrument(instrument):
+    """parse instrument label
+        0240_Chaos_sf2_file
+    """
+    instrument = instrument.split('sf2')[0]
+    return ''.join(instrument.split('_')[3:])
+
+
+# %%
 def fetch_instruments(cat, instrument_type):
     instruments_ = list(instruments[cat][instrument_type])
     first_inst = instruments_[0]
-    return [dict(label=_, value=_) for _ in instruments_], first_inst
+    return [dict(label=relabel_instrument(_), value=_) for _ in instruments_], first_inst
+
 
 # %%
+def fetch_instrument_path(instrument_name):
+    return instrument_paths[instrument_name]

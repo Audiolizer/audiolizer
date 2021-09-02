@@ -165,4 +165,6 @@ if __name__ == '__main__':
                    mode='external',
                    debug=True)
 # -
+pwd
+
 

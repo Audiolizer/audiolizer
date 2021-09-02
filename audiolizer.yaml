@@ -15,7 +15,6 @@ app:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
       - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
       - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
-
     title: Market Audiolizer
     suppress_callback_exceptions: True
 
@@ -86,11 +85,7 @@ player_settings:
             - dbc.Col:
                 width: 12
                 children:
-                - dac.DashAudioComponents:
-                    id: audio_player
-                    src: output.wav
-                    autoPlay: True
-                    controls: True
+                - 'midi player'
             - dbc.Col:
                 width: 12
                 children:
@@ -113,37 +108,8 @@ player_settings:
             children: stop
         - html.Div:
             id: stop-clicks
-
-        # - html.H4: Cache settings
-        # - dbc.Row:
-        #     children:
-        #       - dbc.Col:
-        #           width: 4
-        #           children:
-        #           - daq.NumericInput:
-        #               id: price_threshold
-        #               max: 50
-        #               value: 10
-        #               label: price [Mb]
-        #               labelPosition: bottom
-        #       - dbc.Col:
-        #           width: 4
-        #           children:
-        #           - daq.NumericInput:
-        #               id: wav_threshold
-        #               max: 50
-        #               value: 10
-        #               label: wav [Mb]
-        #               labelPosition: bottom
-        #       - dbc.Col:
-        #           width: 4
-        #           children:
-        #           - daq.NumericInput:
-        #               id: midi_threshold
-        #               max: 50
-        #               value: 10
-        #               label: midi [Mb]
-        #               labelPosition: bottom
+            style:
+              display: none
 
 date_settings:
   - dbc.Row:
@@ -234,18 +200,6 @@ date_settings:
                 required: True
                 value: 7D
                 bs_size: lg
-        # - dbc.Col:
-        #     width:
-        #       size: 6
-        #     children:
-        #     - dbc.Select:
-        #         id: timezone
-        #         options:
-        #           - label: GMT
-        #             value: GMT
-        #         required: True
-        #         value: GMT
-        #         bs_size: lg
 
 instrument_settings:
   - dcc.Dropdown:
@@ -257,9 +211,6 @@ instrument_settings:
   - dcc.Dropdown:
       id: instrument
       clearable: False
-  - html.Div:
-      id: path
-      children: hey
   - html.Div:
       id: out-component
       children: 'True'
@@ -332,22 +283,6 @@ duration_settings:
             label: tempo BPM
 
 pitch_settings:
-  - dbc.Row:
-      children:
-        - dbc.Col:
-            width:
-              size: 8
-              offset: 2
-            children:
-            - dcc.Dropdown:
-                id: mode
-                clearable: False
-                options:
-                  - label: tone
-                    value: tone
-                  - label: pitch
-                    value: pitch
-                value: pitch
   - dbc.Row:
       children:
       - dbc.Col:
@@ -434,9 +369,15 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
-    - ${storage}
     - html.Div:
         id: data_dump
+    - html.Div:
+        id: preset-path
+        children: ''
+    - dcc.Store:
+        id: midi-data
+    - html.Div:
+        id: midi-display
 
 callbacks:
   update_base_options:
@@ -446,6 +387,7 @@ callbacks:
     output:
       - id: base
         attr: options
+
   update_quote_options:
     input:
       - id: base
@@ -458,12 +400,11 @@ callbacks:
         attr: value
       - id: quote
         attr: options
+
   update_date_range:
     input:
       - id: date-select
         attr: value
-      # - id: timezone
-      #   attr: value
     output:
       - id: date-range
         attr: start_date
@@ -473,17 +414,8 @@ callbacks:
         attr: value
       - id: date-range
         attr: initial_visible_month
-        
-  # update_timezone_options:
-  #   input:
-  #     - id: url
-  #       attr: pathname
-  #   output:
-  #     - id: timezone
-  #       attr: options
-  #   callback: history.get_timezones
 
-  play_wav:
+  play:
     input:
       - id: base
         attr: value
@@ -497,8 +429,6 @@ callbacks:
         attr: value
       - id: frequency-drag
         attr: value
-      - id: mode
-        attr: value
       - id: drop-quantile
         attr: value
       - id: beat-quantile
@@ -511,29 +441,19 @@ callbacks:
         attr: value
       - id: candlestick-chart
         attr: selectedData
-      # - id: wav_threshold
-      #   attr: value
-      # - id: midi_threshold
-      #   attr: value
-      # - id: price_threshold
-      #   attr: value
       - id: price_type
         attr: value
-      # - id: timezone
-        # attr: value
     output:
       - id: candlestick-chart
         attr: figure
-      - id: audio_player
-        attr: src
+      - id: midi-data
+        attr: data
       - id: midi_download
         attr: href
       - id: midi_download
         attr: download
       - id: loading-output
         attr: children
-      - id: midi-data
-        attr: data
 
   slider_marks:
     input:
@@ -577,5 +497,22 @@ callbacks:
       - id: instrument
         attr: value
     callback: midi_loader.fetch_instruments
+
+  instrument_path:
+    input:
+      - id: instrument
+        attr: value
+    output:
+      - id: preset-path
+        attr: children
+    callback: midi_loader.fetch_instrument_path
+
+  # midi_display:
+  #   input:
+  #     - id: midi-data
+  #       attr: data
+  #   output:
+  #     - id: midi-display
+  #       attr: children
 
 
