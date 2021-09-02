@@ -1,3 +1,5 @@
+# 2021-09-02 11:39:06.138201: clock-out
+
 * midi playback, fixed bug in today naming convention, volume based duration
 * should probably clone and serve webaudiofont locally
 * bug: today, tomonth, toweek, toyear should be separate csv (named after granularity)
