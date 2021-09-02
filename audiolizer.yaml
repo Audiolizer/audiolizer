@@ -11,7 +11,10 @@ app:
       - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
+    external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
+      - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
+      - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
     title: Market Audiolizer
     suppress_callback_exceptions: True
 
@@ -82,11 +85,7 @@ player_settings:
             - dbc.Col:
                 width: 12
                 children:
-                - dac.DashAudioComponents:
-                    id: audio_player
-                    src: output.wav
-                    autoPlay: True
-                    controls: True
+                - 'midi player'
             - dbc.Col:
                 width: 12
                 children:
@@ -315,22 +314,22 @@ duration_settings:
             label: tempo BPM
 
 pitch_settings:
-  - dbc.Row:
-      children:
-        - dbc.Col:
-            width:
-              size: 8
-              offset: 2
-            children:
-            - dcc.Dropdown:
-                id: mode
-                clearable: False
-                options:
-                  - label: tone
-                    value: tone
-                  - label: pitch
-                    value: pitch
-                value: pitch
+  # - dbc.Row:
+  #     children:
+  #       - dbc.Col:
+  #           width:
+  #             size: 8
+  #             offset: 2
+  #           children:
+  #           - dcc.Dropdown:
+  #               id: mode
+  #               clearable: False
+  #               options:
+  #                 - label: tone
+  #                   value: tone
+  #                 - label: pitch
+  #                   value: pitch
+  #               value: pitch
   - dbc.Row:
       children:
       - dbc.Col:
@@ -413,6 +412,14 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+    - html.Div:
+        id: preset-path
+        children: ''
+    - dcc.Store:
+        id: midi-data
+    - html.Div:
+        id: midi-display
+
 callbacks:
   update_base_options:
     input:
@@ -471,8 +478,8 @@ callbacks:
         attr: value
       - id: frequency-drag
         attr: value
-      - id: mode
-        attr: value
+      # - id: mode # remove tone setting
+      #   attr: value
       - id: drop-quantile
         attr: value
       - id: beat-quantile
@@ -498,8 +505,10 @@ callbacks:
     output:
       - id: candlestick-chart
         attr: figure
-      - id: audio_player
-        attr: src
+      - id: midi-data
+        attr: data
+      # - id: audio_player
+      #   attr: src
       - id: midi_download
         attr: href
       - id: midi_download
@@ -548,5 +557,22 @@ callbacks:
       - id: instrument
         attr: value
     callback: midi_loader.fetch_instruments
+
+  instrument_path:
+    input:
+      - id: instrument
+        attr: value
+    output:
+      - id: preset-path
+        attr: children
+    callback: midi_loader.fetch_instrument_path
+
+  # midi_display:
+  #   input:
+  #     - id: midi-data
+  #       attr: data
+  #   output:
+  #     - id: midi-display
+  #       attr: children
 
 

@@ -32,6 +32,8 @@ from history import get_history, get_today_GMT, get_granularity
 
 from midi_loader import instruments, instrument_paths, instrument_pitches
 
+import json
+
 # +
 from dash.exceptions import PreventUpdate
 
@@ -84,6 +86,8 @@ import dash_html_components as html
 from psidash.psidash import load_app
 
 import dash_core_components as dcc
+
+from dash.dependencies import Input, Output, ClientsideFunction
 
 from datetime import datetime
 
@@ -202,6 +206,16 @@ def freq(note, A4=A4):
 
 # -
 
+def midi_note(freq):
+    """
+    The midi frequency standard is given by
+    
+    d = 69 + 12*log_2(f/440hz)
+    
+    https://en.wikipedia.org/wiki/MIDI_tuning_standard"""
+    return int(69 + 12*np.log2(freq/440))
+
+
 def get_beats(start, end, freq):
     return len(pd.date_range(pd.to_datetime(start),
                              pd.to_datetime(end) + pd.Timedelta(freq),
@@ -318,6 +332,7 @@ def beeper(freq, amplitude=1, duration=.25):
     return (amplitude*_ for _ in audiogen_p3.beep(freq, duration))
 
 def get_frequency(price, min_price, max_price, log_frequency_range):
+    """linear map from price to frequency"""
     return np.interp(price, [min_price, max_price], [10**_ for _ in log_frequency_range])
 
 @callbacks.update_base_options
@@ -355,26 +370,23 @@ def update_date_range(date_select,
     return date_range_start, date_range_end, cadence, initial_visible_month
 
 @callbacks.play
-def play(base, quote, start, end, cadence, log_freq_range,
-         mode, drop_quantile, beat_quantile,
-         tempo, toggle_merge, silence,
+def play(base, quote,
+         start, end,
+         cadence,
+         log_freq_range,
+#          mode, # remove tone option
+         drop_quantile, beat_quantile,
+         tempo,
+         toggle_merge, silence,
          selectedData,
-         # wav_threshold, midi_threshold, price_threshold,
          price_type,
-         # timezone,
          ):
     t0 = time.perf_counter()
     # logger.info('timezone = {}'.format(timezone))
     ticker = '{}-{}'.format(base, quote)
     logger.info('ticker: {}'.format(ticker))
-    cleared = clear_files('assets/*.wav', max_storage=wav_threshold*1e6)
-    if len(cleared) > 0:
-        logger.info('cleared {} wav files'.format(len(cleared)))
-        
-    t1 = time.perf_counter()
-    logger.info('time to clear wav {}'.format(t1-t0))
-    t0 = t1
-        
+    
+    # clear extraneous midi files
     cleared = clear_files('assets/*.midi', max_storage=midi_threshold*1e6)
     if len(cleared) > 0:
         logger.info('cleared {} midi files'.format(len(cleared)))
@@ -382,16 +394,16 @@ def play(base, quote, start, end, cadence, log_freq_range,
     t1 = time.perf_counter()
     logger.info('time to clear midi {}'.format(t1-t0))
     t0 = t1
-        
+    
+    # clear extraneous history files
     cleared = clear_files('history/*.csv.gz', max_storage=price_threshold*1e6)
     if len(cleared) > 0:
         logger.info('cleared {} price files'.format(len(cleared)))
-        
+
     t1 = time.perf_counter()
     logger.info('time to clear price {}'.format(t1-t0))
     t0 = t1
-        
-        
+
     logger.info('start, end {} {}'.format(start, end))
     granularity = get_granularity(cadence)
     
@@ -405,7 +417,7 @@ def play(base, quote, start, end, cadence, log_freq_range,
     except:
         logger.info('cannot get history for {} {} {}'.format(ticker, start, end))
         raise
-        
+    
     t1 = time.perf_counter()
     logger.info('time to get history {}'.format(t1-t0))
     t0 = t1
@@ -426,14 +438,14 @@ def play(base, quote, start, end, cadence, log_freq_range,
     else:
         silences = ''
 
-    fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
+    fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
         ticker,
         price_type,
         start_.date(),
         end_.date(),
         cadence,
         *['{}'.format(pitch(10**_).replace('#', 'sharp')) for _ in log_freq_range],
-        mode,
+#         mode, # removed tone/pitch option
         drop_quantile,
         beat_quantile,
         '{}bpm'.format(tempo),
@@ -450,35 +462,11 @@ def play(base, quote, start, end, cadence, log_freq_range,
     t1 = time.perf_counter()
     logger.info('time to set midi params {}'.format(t1-t0))
     t0 = t1
-    
-    if selectedData is not None:
-        start_select, end_select = selectedData['range']['x']
-        # need the number of beats from beginning to start_select
-        start_time = duration*(get_beats(start_, start_select, cadence)-1)
-        # number of beats from beginning to end_select
-        end_time = duration*(get_beats(start_, end_select, cadence)-1)
-        total_time = duration*(get_beats(start_, end_, cadence)-1)
-#         logger.info('selected start, end time, total time:', start_time, end_time, total_time)
-        play_time = '#t={},{}'.format(start_time, end_time)
-#         logger.info(start_select, end_select, play_time)
-
-    t1 = time.perf_counter()
-    logger.info('time setup selectedData {}'.format(t1-t0))
-    t0 = t1
 
     new_ = refactor(new[start_:end_], cadence)
     logger.info('{}->{}'.format(*new_.index[[0,-1]]))
     
     midi_asset = app.get_asset_url(midi_file)
-
-    if os.path.exists(fname):
-        return (candlestick_plot(new_, base, quote),
-                app.get_asset_url(fname)+play_time,
-                midi_asset,
-                midi_asset,
-                midi_asset)
-
-#     assert get_beats(*new_.index[[0,-1]], cadence) == len(new_)
 
     max_vol = new_.volume.max() # normalizes peak amplitude
     min_price = new_[price_type].min() # sets lower frequency bound
@@ -495,39 +483,38 @@ def play(base, quote, start, end, cadence, log_freq_range,
     for t, (price, volume_) in new_[[price_type, 'volume']].iterrows():
         if ~np.isnan(price):
             freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-            if mode == 'tone':
-                pass
-            elif mode == 'pitch':
-                freq_ = freq(pitch(freq_))
-            else:
-                raise NotImplementedError(mode)
-            beep = freq_, volume_/max_vol, duration
+            freq_ = freq(pitch(freq_))
+            beep = midi_note(freq_), volume_/max_vol, duration
             beeps.append(beep)
         else:
             freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-            beep = freq_, 0, duration
+            beep = midi_note(freq_), 0, duration
             beeps.append(beep)
             logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
-    if mode == 'pitch':
-        if toggle_merge:
-            beeps = merge_pitches(beeps, amp_min)
-        if silence:
-            beeps = quiet(beeps, min_vol/max_vol)
 
+    if toggle_merge:
+        beeps = merge_pitches(beeps, amp_min)
+    if silence:
+        beeps = quiet(beeps, min_vol/max_vol)
+        
+    notes = defaultdict(list)
+    dur0 = 0
+    max_freq_ = 0
+    max_amp_ = 0
+    for freq_, amp_, dur_ in beeps:
+        notes['when'].append(dur0)
+        notes['pitch'].append(freq_)
+        notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
+        notes['volume'].append(1) # could use a constant amplitude
+        max_freq_ = max(max_freq_, freq_)
+        max_amp_ = max(max_amp_, amp_)
+        dur0 += duration
+    print('max frequency was {}'.format(max_freq_))
+    print('max amp was {}'.format(max_amp_))
 
     t1 = time.perf_counter()
     logger.info('time to generate audio {}'.format(t1-t0))
     t0 = t1
-    
-    audio = [beeper(*beep) for beep in beeps]
-    
-    t1 = time.perf_counter()
-    logger.info('time to generate beeps {}'.format(t1-t0))
-    t0 = t1
-    
-    with open('assets/'+fname, "wb") as f:
-        audiogen_p3.sampler.write_wav(f, itertools.chain(*audio))
-
 
     write_midi(beeps, tempo, 'assets/' + midi_file)
 
@@ -536,10 +523,18 @@ def play(base, quote, start, end, cadence, log_freq_range,
     t0 = t1
     
     return (candlestick_plot(new_, base, quote),
-            app.get_asset_url(fname)+play_time,
+            notes,
             midi_asset,
             midi_asset,
             '')
+
+
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='play'),
+    Output('midi-display', 'children'),
+    Input('instrument', 'value'),
+    Input('preset-path', 'children'),
+    Input('midi-data', 'data'))
 
 server = app.server
 
@@ -554,5 +549,4 @@ if __name__ == '__main__':
         extra_files=['../audiolizer.yaml']
         )
 # -
-
 

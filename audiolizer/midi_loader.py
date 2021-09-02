@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.11.4
+#       jupytext_version: 1.11.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -132,9 +132,21 @@ def fetch_instrument_types(cat):
 
 
 # %%
+def relabel_instrument(instrument):
+    """parse instrument label
+        0240_Chaos_sf2_file
+    """
+    instrument = instrument.split('sf2')[0]
+    return ''.join(instrument.split('_')[3:])
+
+
+# %%
 def fetch_instruments(cat, instrument_type):
     instruments_ = list(instruments[cat][instrument_type])
     first_inst = instruments_[0]
-    return [dict(label=_, value=_) for _ in instruments_], first_inst
+    return [dict(label=relabel_instrument(_), value=_) for _ in instruments_], first_inst
+
 
 # %%
+def fetch_instrument_path(instrument_name):
+    return instrument_paths[instrument_name]

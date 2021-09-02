@@ -35,7 +35,7 @@ function play_sequence(preset, notes){
             audioContext,
             audioContext.destination,
             window[preset],
-            audioContext.currentTime + parseInt(when),
+            audioContext.currentTime + when,
             Math.max(parseInt(pitch), 0),
             Math.max(duration, 0),
             Math.max(volume, 0)

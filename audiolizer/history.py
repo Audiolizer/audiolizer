@@ -256,7 +256,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
     if end_date >= today:
         logger.info('end date is today!')
         # check age of today's data. If it's old, fetch the new one
-        today_fname = audiolizer_temp_dir + '/{}-today.csv.gz'.format(ticker)
+        today_fname = audiolizer_temp_dir + '/{}-{}-today.csv.gz'.format(ticker, granularity)
         if os.path.exists(today_fname):
             if get_age(today_fname) > max_age:
                 logger.info('{} is too old, fetching new data'.format(today_fname))
