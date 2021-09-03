@@ -534,38 +534,6 @@ def play(base, quote,
             
 #     print('max frequency was {}'.format(max_freq_))
 #     print('max amp was {}'.format(max_amp_))
-    
-    for t, (price, volume_) in new_[[price_type, 'volume']].iterrows():
-        if ~np.isnan(price):
-            freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-            freq_ = freq(pitch(freq_))
-            beep = midi_note(freq_), volume_/max_vol, duration
-            beeps.append(beep)
-        else:
-            freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-            beep = midi_note(freq_), 0, duration
-            beeps.append(beep)
-            logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
-
-    if toggle_merge:
-        beeps = merge_pitches(beeps, amp_min)
-    if silence:
-        beeps = quiet(beeps, min_vol/max_vol)
-        
-    notes = defaultdict(list)
-    dur0 = 0
-    max_freq_ = 0
-    max_amp_ = 0
-    for freq_, amp_, dur_ in beeps:
-        notes['when'].append(dur0)
-        notes['pitch'].append(freq_)
-        notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
-        notes['volume'].append(1) # could use a constant amplitude
-        max_freq_ = max(max_freq_, freq_)
-        max_amp_ = max(max_amp_, amp_)
-        dur0 += duration
-    print('max frequency was {}'.format(max_freq_))
-    print('max amp was {}'.format(max_amp_))
 
     t1 = time.perf_counter()
     logger.info('time to generate audio {}'.format(t1-t0))
@@ -573,7 +541,6 @@ def play(base, quote,
 
     # need to rewrite for notes
 #     write_midi(beeps, tempo, 'assets/' + midi_file)
-    write_midi(beeps, tempo, 'assets/' + midi_file)
 
     t1 = time.perf_counter()
     logger.info('time to write audio data {}'.format(t1-t0))
@@ -591,15 +558,6 @@ app.clientside_callback(
     Output('stop-clicks', 'children'),
     Input('stop', 'n_clicks'))
 
-
-app.clientside_callback(
-    ClientsideFunction(namespace='dash_midi', function_name='play'),
-    Output('midi-display', 'children'),
-    Input('instrument', 'value'),
-    Input('preset-path', 'children'),
-    Input('midi-data', 'data'))
-
-server = app.server
 
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='play'),
