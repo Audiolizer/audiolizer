@@ -1,3 +1,5 @@
+# 2021-10-09 19:23:08.451880: clock-out
+
 * missing half the notes?
 
 # 2021-10-09 19:17:04.033533: clock-in
