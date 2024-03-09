@@ -7,7 +7,8 @@ services:
   #     - "6379:6379"
 
   audiolizer:
-    image: apembroke/audiolizer:0.4.10
+    image: apembroke/audiolizer:0.4.11
+    build: .
     ports:
       - "8000:5000"
     environment:

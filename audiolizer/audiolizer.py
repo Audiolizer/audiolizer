@@ -526,11 +526,13 @@ def play(base, quote,
             notes['when'].append(dur0)
             notes['pitch'].append(freq_)
 #             notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
-            notes['duration'].append(duration*1.5) # peak amp will get 4 beats
+#             notes['duration'].append(duration*1.5)
+            notes['duration'].append(dur_)
             notes['volume'].append(1) # could use a constant amplitude
             max_freq_ = max(max_freq_, freq_)
             max_amp_ = max(max_amp_, amp_)
-            dur0 += duration
+#             dur0 += duration
+            dur0 += dur_
             
 #     print('max frequency was {}'.format(max_freq_))
 #     print('max amp was {}'.format(max_amp_))

@@ -2,11 +2,13 @@ FROM python:3.7-slim-buster AS builder
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git
+    apt-get install -y git build-essential libatlas-base-dev
 
 COPY requirements.txt .
-RUN pip install --user -r requirements.txt
-RUN pip install --user git+https://github.com/predsci/psidash.git
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --user -r requirements.txt && \
+    pip install --user git+https://github.com/predsci/psidash.git
+
 
 
 FROM python:3.7-slim-buster AS runtime

@@ -8,3 +8,10 @@ venv
 *.pyc
 .DS_Store
 .env
+
+hourly-outputs
+
+*.ipynb_checkpoints
+*.sublime-*
+
+*.log
