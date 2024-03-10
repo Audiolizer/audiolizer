@@ -95,7 +95,6 @@ player_settings:
                     children: Download MIDI
                     href: ''
                     download: ''
-
   - dbc.Col:
       width:
         xs: 12
@@ -130,6 +129,18 @@ player_settings:
             id: stop-clicks
             style:
               display: none
+  - dbc.Col:
+      width:
+        xs: 12
+        sm: 12
+        md: 12
+        lg: 3
+        xl: 3
+      children:
+        - html.Br:
+        - dcc.Input:
+            id: timestamp-trigger
+            # type: hidden
 
 date_settings:
   - dbc.Row:
@@ -399,6 +410,10 @@ layout:
         id: midi-data
     - html.Div:
         id: midi-display
+    - dcc.Store:
+        id: timestamp-store
+    - dcc.Markdown:
+        id: selected-data
 
 callbacks:
   update_base_options:
@@ -460,8 +475,8 @@ callbacks:
         attr: value
       - id: toggle-silence
         attr: value
-      - id: candlestick-chart
-        attr: selectedData
+      # - id: candlestick-chart
+      #   attr: selectedData
       - id: price_type
         attr: value
     output:
@@ -474,6 +489,14 @@ callbacks:
       - id: midi_download
         attr: download
       - id: loading-output
+        attr: children
+
+  render_selected_data:
+    input:
+      - id: candlestick-chart
+        attr: selectedData
+    output:
+      - id: selected-data
         attr: children
 
   slider_marks:
@@ -527,6 +550,7 @@ callbacks:
       - id: preset-path
         attr: children
     callback: midi_loader.fetch_instrument_path
+
 
   # midi_display:
   #   input:

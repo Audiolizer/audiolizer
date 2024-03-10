@@ -37,7 +37,6 @@ from midi_loader import instruments, instrument_paths, instrument_pitches
 
 import json
 
-# +
 from dash.exceptions import PreventUpdate
 
 from Historic_Crypto import Cryptocurrencies
@@ -45,7 +44,6 @@ from Historic_Crypto import Cryptocurrencies
 import flask
 
 data = Cryptocurrencies(coin_search = '', extended_output=True).find_crypto_pairs()
-# -
 
 crypto_dict = {}
 for base, group in data.groupby('base_currency'):
@@ -72,18 +70,6 @@ import audiogen_p3
 import itertools
 import sys
 
-# def beeper(freq, amplitude = 1):
-#     return (amplitude*_ for _ in audiogen_p3.beep(freq))
-
-# try:
-#     audiogen_p3.sampler.play(itertools.chain(
-#         *[beeper(100*(1+i), 1./(1+i)) for i in range(8)]
-#     ))
-# except:
-#     logger.warning('could not play sampler')
-#     pass
-# -
-
 import dash_html_components as html
 
 from psidash.psidash import load_app
@@ -96,8 +82,16 @@ from datetime import datetime
 
 import plotly.graph_objs as go
 
+from psidash.psidash import get_callbacks, load_conf, load_dash, load_components, assign_callbacks
 
-# +
+from math import log2
+
+import glob
+from collections import defaultdict
+
+from dash.dependencies import Input, Output, ClientsideFunction
+import dash
+
 def refactor(df, frequency='1W'):
     """Refactor/rebin the data to a lower cadence
 
@@ -117,22 +111,22 @@ def refactor(df, frequency='1W'):
     return pd.DataFrame(dict(low=low, high=high, open=open_, close=close, volume=volume))
 
 def candlestick_plot(df, base, quote):
-    return go.Figure(data=[
-        go.Candlestick(
-            x=df.index,
-            open=df.open,
-            high=df.high,
-            low=df.low,
-            close=df.close,
-            showlegend=False),
-        go.Bar(
-            x=df.index,
-            y=df.volume,
-            marker_color='rgba(158,202,225,.5)',
-            yaxis='y2',
-            showlegend=False,
-        ),
-        ],
+    return go.Figure(
+        data=[
+            go.Candlestick(
+                x=df.index,
+                open=df.open,
+                high=df.high,
+                low=df.low,
+                close=df.close,
+                showlegend=False),
+            go.Bar(
+                x=df.index,
+                y=df.volume,
+                marker_color='rgba(158,202,225,.5)',
+                yaxis='y2',
+                showlegend=False),
+            ],
         layout=dict(yaxis=dict(title='{} price [{}]'.format(base, quote)),
                     yaxis2=dict(
                         title='{base} volume [{base}]'.format(base=base),
@@ -149,11 +143,7 @@ def write_plot(fig, fname):
         f.write('\n')
 
 
-# -
 
-from psidash.psidash import get_callbacks, load_conf, load_dash, load_components, assign_callbacks
-
-# +
 A4 = 440 # tuning
 C0 = A4*pow(2, -4.75)
 
@@ -172,10 +162,7 @@ frequencies = dict(
 # -
 
 frequency_marks = {np.log10(v): k for k,v in frequencies.items()}
-frequency_marks
 
-# +
-from math import log2
 
 def pitch(freq):
     """convert from frequency to pitch
@@ -278,10 +265,6 @@ def write_midi(beeps, tempo, fname, time=0, track=0, channel=0):
         midi_file.writeFile(output_file)
 
 
-# +
-import glob
-from collections import defaultdict
-
 def get_files(fname_glob="assets/*.wav"):
     """retrieve files and metadata"""
     fnames = glob.glob(fname_glob)
@@ -307,16 +290,10 @@ def clear_files(fname_glob="assets/*.wav", max_storage=10e6):
     return []
 
 
-# -
-
-from dash.dependencies import Input, Output, ClientsideFunction
-
-# +
 conf = load_conf('../audiolizer.yaml')
 
 # app = dash.Dash(__name__, server=server) # call flask server
 
-import dash
 
 server = flask.Flask(__name__) # define flask app.server
 
@@ -397,7 +374,7 @@ def play(base, quote,
          drop_quantile, beat_quantile,
          tempo,
          toggle_merge, silence,
-         selectedData,
+         # selectedData,
          price_type,
          ):
     t0 = time.perf_counter()
@@ -556,6 +533,12 @@ def play(base, quote,
             '',
             )
 
+@callbacks.render_selected_data
+def render_selected_data(data):
+    # Convert JSON data to a formatted string
+    formatted_json = "```json\n" + json.dumps(data, indent=4) + "\n```"
+    return formatted_json
+
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='stop'),
     Output('stop-clicks', 'children'),
@@ -569,6 +552,28 @@ app.clientside_callback(
     Input('instrument', 'value'),
     Input('preset-path', 'children'),
     Input('midi-data', 'data'))
+
+
+@app.callback(
+    Output('timestamp-store', 'data'),
+    [Input('timestamp-trigger', 'value')]
+)
+def update_store(timestamp):
+    return {'timestamp': timestamp}
+
+
+app.clientside_callback(
+    """
+    function(timestamp) {
+        // Logic to convert timestamp to selectedData format
+        return newSelectedData;
+    }
+    """,
+    Output('candlestick-chart', 'selectedData'),
+    [Input('timestamp-store', 'data')]
+)
+
+
 
 server = app.server
 
