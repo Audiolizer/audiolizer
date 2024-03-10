@@ -1,3 +1,5 @@
+# 2024-03-10 15:07:52.003403: clock-out
+
 * stop, play logging time in console
 * added play button
 
