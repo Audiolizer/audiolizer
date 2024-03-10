@@ -10,10 +10,10 @@ services:
     image: apembroke/audiolizer:0.4.11
     build: .
     ports:
-      - "8000:5000"
+      - "8080:8080"
     environment:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
-    command: ["gunicorn", "--workers=4", "--bind", "0.0.0.0:5000", "audiolizer:server"]
+    command: ["gunicorn", "--workers=4", "--bind", "0.0.0.0:8080", "audiolizer:server"]
     volumes:
       - type: bind
         source: ${PWD}

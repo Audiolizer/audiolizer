@@ -80,6 +80,7 @@ player_settings:
         lg: 4
         xl: 4
       children:
+        - html.Br:
         - dbc.Row:
             children:
             - dbc.Col:
@@ -102,6 +103,7 @@ player_settings:
         lg: 3
         xl: 3
       children:
+        - html.Br:
         - html.Button:
             id: stop
             n_clicks: 0
