@@ -1,3 +1,6 @@
+
+# 2024-03-10 14:11:22.854611: clock-in
+
 # 2024-03-10 13:52:09.611833: clock-out: T-10m 
 
 * reviewing webaudiofont
