@@ -25,11 +25,30 @@ var sound_library = {
 
 function play_sequence(preset, notes){
     window['envelope'] = [];
+    window['timeoutIDs'] = [];
+
+    const scheduleNote = (t, when, pitch, duration, volume) => {
+        // Save the timeout ID to the array
+        var timeoutID = setTimeout(() => {
+            console.log(`Playing note at timestamp: ${t}`);
+            // updatePlotHighlight(t); // Call a function to update the plot based on the timestamp
+        }, when * 1000); // Convert 'when' to milliseconds
+
+        window['timeoutIDs'].push(timeoutID);
+    };
+
+
+
     for (var n = 0; n < notes['when'].length; n++) {
+        t = notes['t'][n]
         when = notes['when'][n];
         pitch = notes['pitch'][n];
         duration = notes['duration'][n];
         volume = notes['volume'][n];
+
+
+        // Schedule each note by calling the function that creates a closure
+        scheduleNote(t, when, pitch, duration, volume);
 
         var envelope = player.queueWaveTable(
             audioContext,
@@ -45,16 +64,29 @@ function play_sequence(preset, notes){
 }
 
 function stop_sequence(){
-    if (typeof window['envelope'] !== 'undefined'){
-        console.log('stopping');
-        for (var n = 0; n < window['envelope'].length; n++) {
-            window['envelope'][n].cancel(); 
-        } 
+    // Cancel all scheduled envelopes for sound playback
+    if (typeof window['envelope'] !== 'undefined') {
+        console.log('stopping envelopes');
+        window['envelope'].forEach(function(envelope) {
+            envelope.cancel(); 
+        });
+        window['envelope'] = []; // Clear the envelopes array after stopping
     } else {
-        console.log('nothing to cancel');
+        console.log('no envelopes to cancel');
     }
 
+    // Clear all scheduled setTimeout calls to prevent logging
+    if (typeof window['timeoutIDs'] !== 'undefined' && window['timeoutIDs'].length > 0) {
+        console.log('stopping scheduled logs');
+        window['timeoutIDs'].forEach(function(timeoutID) {
+            clearTimeout(timeoutID);
+        });
+        window['timeoutIDs'] = []; // Clear the timeoutIDs array after clearing timeouts
+    } else {
+        console.log('no scheduled logs to cancel');
+    }
 }
+
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {

@@ -231,24 +231,24 @@ def merge_pitches(beeps, amp_min):
     merged = []
     last_freq = 0
     last_amp = 0
-    for freq, amp, dur in beeps:
+    for t, freq, amp, dur in beeps:
         if freq == last_freq:
             if merged[-1][1] < amp_min:
                 # todo: use moving average
                 merged[-1][1] = (amp + last_amp)/2
                 merged[-1][2] += dur
             continue
-        merged.append([freq, amp, dur])
+        merged.append([t, freq, amp, dur])
         last_freq = freq
         last_amp = amp
     return merged
 
 def quiet(beeps, min_amp):
     silenced = []
-    for freq, amp, dur in beeps:
+    for t, freq, amp, dur in beeps:
         if amp < min_amp:
             amp = 0
-        silenced.append((freq, amp, dur))
+        silenced.append((t, freq, amp, dur))
     return silenced     
 
 
@@ -508,11 +508,11 @@ def play(base, quote,
             if ~np.isnan(price):
                 freq_ = get_frequency(price, min_price, max_price, log_freq_range)
                 freq_ = freq(pitch(freq_))
-                beep = midi_note(freq_), volume_/max_vol, duration
+                beep = t, midi_note(freq_), volume_/max_vol, duration
                 beeps.append(beep)
             else:
                 freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-                beep = midi_note(freq_), 0, duration
+                beep = t, midi_note(freq_), 0, duration
                 beeps.append(beep)
                 logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
 
@@ -522,7 +522,8 @@ def play(base, quote,
             beeps = quiet(beeps, min_vol/max_vol)
             
         dur0 = 0
-        for freq_, amp_, dur_ in beeps:
+        for t, freq_, amp_, dur_ in beeps:
+            notes['t'].append(t)
             notes['when'].append(dur0)
             notes['pitch'].append(freq_)
 #             notes['duration'].append(duration*(1+3*amp_)) # peak amp will get 4 beats
