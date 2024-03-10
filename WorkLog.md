@@ -1,3 +1,6 @@
+
+# 2024-03-10 16:39:02.231555: clock-in
+
 # 2024-03-10 15:07:52.003403: clock-out
 
 * stop, play logging time in console
