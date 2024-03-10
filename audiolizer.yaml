@@ -95,6 +95,24 @@ player_settings:
                     children: Download MIDI
                     href: ''
                     download: ''
+
+  - dbc.Col:
+      width:
+        xs: 12
+        sm: 12
+        md: 12
+        lg: 3
+        xl: 3
+      children:
+        - html.Br:
+        - html.Button:
+            id: play
+            n_clicks: 0
+            children: Play
+        - html.Div:
+            id: play-clicks
+            style:
+              display: none
   - dbc.Col:
       width:
         xs: 12

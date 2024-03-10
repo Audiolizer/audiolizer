@@ -58,7 +58,7 @@ function stop_sequence(){
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
-        play: function(preset, path, notes) {
+        play: function(n_clicks, preset, path, notes) {
             // stop any currently playing sequence
             stop_sequence();
             if (typeof window[preset] !== 'undefined') {

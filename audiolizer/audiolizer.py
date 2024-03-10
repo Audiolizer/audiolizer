@@ -564,6 +564,7 @@ app.clientside_callback(
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='play'),
     Output('midi-display', 'children'),
+    Input('play', 'n_clicks'),
     Input('instrument', 'value'),
     Input('preset-path', 'children'),
     Input('midi-data', 'data'))
