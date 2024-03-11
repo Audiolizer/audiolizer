@@ -328,7 +328,7 @@ pitch_settings:
           - daq.ToggleSwitch:
               id: toggle-merge
               label: merge
-              value: True
+              value: False
               labelPosition: bottom
       - dbc.Col:
           width:
@@ -337,7 +337,7 @@ pitch_settings:
           - daq.ToggleSwitch:
               id: toggle-silence
               label: rests
-              value: True
+              value: False
               labelPosition: bottom
 
 storage:

@@ -1,3 +1,5 @@
+* set merge defaults to False
+
 # 2024-03-11 00:44:59.425895: clock-out
 
 * got playback to highlight bars
