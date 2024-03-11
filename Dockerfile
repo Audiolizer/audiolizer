@@ -8,7 +8,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel && \
     pip install --user -r requirements.txt && \
     pip install --user git+https://github.com/predsci/psidash.git
-
+RUN pip install --user dash-extensions
 
 
 FROM python:3.7-slim-buster AS runtime

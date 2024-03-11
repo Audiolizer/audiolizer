@@ -13,7 +13,8 @@ services:
       - "8080:8080"
     environment:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
-    command: ["gunicorn", "--workers=4", "--bind", "0.0.0.0:8080", "audiolizer:server"]
+      PYTHONUNBUFFERED: 1
+    command: ["gunicorn", "--workers=1", "--bind", "0.0.0.0:8080", "audiolizer:server"]
     volumes:
       - type: bind
         source: ${PWD}
@@ -21,9 +22,9 @@ services:
     working_dir: /home/audiolizer/audiolizer
 
   audiolizer-dev:
-    image: apembroke/audiolizer:latest
+    image: apembroke/audiolizer:0.4.11
     ports:
-      - "80:8050"
+      - "8050:8050"
       - "8888:8888"
     environment:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history

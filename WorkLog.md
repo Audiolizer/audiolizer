@@ -1,3 +1,4 @@
+* got playback to highlight bars
 
 # 2024-03-10 20:12:34.049643: clock-in
 

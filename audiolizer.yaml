@@ -4,6 +4,8 @@ import:
   daq: dash_daq
   dac: dash_audio_components
   dbc: dash_bootstrap_components
+  dex: dash_extensions
+
 
 app:
   jupyter_dash.JupyterDash:
@@ -139,7 +141,8 @@ player_settings:
       children:
         - html.Br:
         - dcc.Input:
-            id: timestamp-trigger
+            id: timestamp-input
+            value: ''
             # type: hidden
 
 date_settings:
@@ -410,10 +413,23 @@ layout:
         id: midi-data
     - html.Div:
         id: midi-display
+    - html.Div:
+        id: candlestick-data-render
     - dcc.Store:
-        id: timestamp-store
-    - dcc.Markdown:
-        id: selected-data
+        id: candlestick-data
+    - dex.EventListener:
+        id: timestamp-listener
+        events:
+          - event: change
+            props:
+              - srcElement.value
+        logging: True
+        # children:
+        # - html.Div:
+        #     id: dummy-div
+    - html.Div:
+        id: log
+
 
 callbacks:
   update_base_options:
@@ -480,8 +496,8 @@ callbacks:
       - id: price_type
         attr: value
     output:
-      - id: candlestick-chart
-        attr: figure
+      - id: candlestick-data
+        attr: data
       - id: midi-data
         attr: data
       - id: midi_download
@@ -491,13 +507,13 @@ callbacks:
       - id: loading-output
         attr: children
 
-  render_selected_data:
-    input:
-      - id: candlestick-chart
-        attr: selectedData
-    output:
-      - id: selected-data
-        attr: children
+  # render_selected_data:
+  #   input:
+  #     - id: candlestick-data
+  #       attr: data
+  #   output:
+  #     - id: candlestick-data-render
+  #       attr: children
 
   slider_marks:
     input:

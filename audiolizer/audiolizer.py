@@ -37,6 +37,8 @@ from midi_loader import instruments, instrument_paths, instrument_pitches
 
 import json
 
+from dash_extensions.enrich import DashProxy, html, Input, Output, State, dcc
+from dash_extensions import EventListener
 from dash.exceptions import PreventUpdate
 
 from Historic_Crypto import Cryptocurrencies
@@ -90,7 +92,9 @@ import glob
 from collections import defaultdict
 
 from dash.dependencies import Input, Output, ClientsideFunction
-import dash
+
+app = DashProxy()
+
 
 def refactor(df, frequency='1W'):
     """Refactor/rebin the data to a lower cadence
@@ -525,19 +529,37 @@ def play(base, quote,
     t1 = time.perf_counter()
     logger.info('time to write audio data {}'.format(t1-t0))
     t0 = t1
+    df = new_.reset_index()
+
+    df['time'] = df['time'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+    candlestick_data = df.to_dict()
+    candlestick_data['base'] = base
+    candlestick_data['quote'] = quote
+
+    # print(json.dumps(candlestick_data))
     
-    return (candlestick_plot(new_, base, quote),
+
+    return (candlestick_data,
             notes,
             midi_asset,
             midi_asset,
             '',
             )
 
-@callbacks.render_selected_data
-def render_selected_data(data):
-    # Convert JSON data to a formatted string
-    formatted_json = "```json\n" + json.dumps(data, indent=4) + "\n```"
-    return formatted_json
+
+# @app.callback(Output("log", "children"),
+#               Input("timestamp-listener", "n_events"),
+#               State("timestamp-listener", "event"))
+# def timestamp_event(n_events, e):
+#     if e is None:
+#         raise PreventUpdate()
+#     return f"Event is '{e['srcElement.value']}' (Event count: {n_events})"
+
+# @callbacks.render_selected_data
+# def render_selected_data(data):
+#     # Convert JSON data to a formatted string
+#     formatted_json = "```json\n" + json.dumps(data, indent=4) + "\n```"
+#     return formatted_json
 
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='stop'),
@@ -554,24 +576,25 @@ app.clientside_callback(
     Input('midi-data', 'data'))
 
 
-@app.callback(
-    Output('timestamp-store', 'data'),
-    [Input('timestamp-trigger', 'value')]
-)
-def update_store(timestamp):
-    return {'timestamp': timestamp}
-
-
 app.clientside_callback(
-    """
-    function(timestamp) {
-        // Logic to convert timestamp to selectedData format
-        return newSelectedData;
-    }
-    """,
-    Output('candlestick-chart', 'selectedData'),
-    [Input('timestamp-store', 'data')]
+    ClientsideFunction(namespace='dash_midi', function_name='updateFigure'),
+    Output('candlestick-chart', 'figure'),
+    Input('candlestick-data', 'data'),  # Assuming this is a dcc.Store or similar
+    Input('timestamp-listener', 'n_events'),
+    State('timestamp-listener', 'event')  # The input element where timestamp is stored
 )
+
+
+# app.clientside_callback(
+#     """
+#     function(timestamp) {
+#         // Logic to convert timestamp to selectedData format
+#         return newSelectedData;
+#     }
+#     """,
+#     Output('candlestick-chart', 'selectedData'),
+#     [Input('timestamp-store', 'data')]
+# )
 
 
 
