@@ -1,3 +1,28 @@
+# 2024-03-11 00:44:59.425895: clock-out
+
+* got playback to highlight bars
+
+# 2024-03-10 20:12:34.049643: clock-in
+
+# 2024-03-10 18:44:46.180330: clock-out: T-20m 
+
+* adding selectedData feedback
+
+# 2024-03-10 16:39:02.231555: clock-in
+
+# 2024-03-10 15:07:52.003403: clock-out
+
+* stop, play logging time in console
+* added play button
+
+# 2024-03-10 14:11:22.854611: clock-in
+
+# 2024-03-10 13:52:09.611833: clock-out: T-10m 
+
+* reviewing webaudiofont
+
+# 2024-03-10 13:29:37.635893: clock-in
+
 # 2024-03-09 12:47:49.710991: clock-out
 
 * fixing build

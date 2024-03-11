@@ -4,6 +4,8 @@ import:
   daq: dash_daq
   dac: dash_audio_components
   dbc: dash_bootstrap_components
+  dex: dash_extensions
+
 
 app:
   jupyter_dash.JupyterDash:
@@ -80,6 +82,7 @@ player_settings:
         lg: 4
         xl: 4
       children:
+        - html.Br:
         - dbc.Row:
             children:
             - dbc.Col:
@@ -102,6 +105,24 @@ player_settings:
         lg: 3
         xl: 3
       children:
+        - html.Br:
+        - html.Button:
+            id: play
+            n_clicks: 0
+            children: Play
+        - html.Div:
+            id: play-clicks
+            style:
+              display: none
+  - dbc.Col:
+      width:
+        xs: 12
+        sm: 12
+        md: 12
+        lg: 3
+        xl: 3
+      children:
+        - html.Br:
         - html.Button:
             id: stop
             n_clicks: 0
@@ -110,6 +131,19 @@ player_settings:
             id: stop-clicks
             style:
               display: none
+  - dbc.Col:
+      width:
+        xs: 12
+        sm: 12
+        md: 12
+        lg: 3
+        xl: 3
+      children:
+        - html.Br:
+        - dcc.Input:
+            id: timestamp-input
+            value: ''
+            # type: hidden
 
 date_settings:
   - dbc.Row:
@@ -379,6 +413,23 @@ layout:
         id: midi-data
     - html.Div:
         id: midi-display
+    - html.Div:
+        id: candlestick-data-render
+    - dcc.Store:
+        id: candlestick-data
+    - dex.EventListener:
+        id: timestamp-listener
+        events:
+          - event: change
+            props:
+              - srcElement.value
+        logging: True
+        # children:
+        # - html.Div:
+        #     id: dummy-div
+    - html.Div:
+        id: log
+
 
 callbacks:
   update_base_options:
@@ -440,13 +491,13 @@ callbacks:
         attr: value
       - id: toggle-silence
         attr: value
-      - id: candlestick-chart
-        attr: selectedData
+      # - id: candlestick-chart
+      #   attr: selectedData
       - id: price_type
         attr: value
     output:
-      - id: candlestick-chart
-        attr: figure
+      - id: candlestick-data
+        attr: data
       - id: midi-data
         attr: data
       - id: midi_download
@@ -455,6 +506,14 @@ callbacks:
         attr: download
       - id: loading-output
         attr: children
+
+  # render_selected_data:
+  #   input:
+  #     - id: candlestick-data
+  #       attr: data
+  #   output:
+  #     - id: candlestick-data-render
+  #       attr: children
 
   slider_marks:
     input:
@@ -507,6 +566,7 @@ callbacks:
       - id: preset-path
         attr: children
     callback: midi_loader.fetch_instrument_path
+
 
   # midi_display:
   #   input:
