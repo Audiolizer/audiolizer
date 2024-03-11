@@ -1,3 +1,6 @@
+
+# 2024-03-10 20:12:34.049643: clock-in
+
 # 2024-03-10 18:44:46.180330: clock-out: T-20m 
 
 * adding selectedData feedback
