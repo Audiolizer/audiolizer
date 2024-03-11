@@ -1,3 +1,5 @@
+# 2024-03-11 00:44:59.425895: clock-out
+
 * got playback to highlight bars
 
 # 2024-03-10 20:12:34.049643: clock-in
