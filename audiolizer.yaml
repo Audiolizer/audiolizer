@@ -111,9 +111,22 @@ player_settings:
             n_clicks: 0
             children: Play
         - html.Div:
-            id: play-clicks
+            id: play-time
             style:
-              display: none
+              # display: none
+  - dbc.Col:
+      width:
+        xs: 12
+        sm: 12
+        md: 12
+        lg: 3
+        xl: 3
+      children:
+        - html.Br:
+        - html.Button:
+            id: pause
+            n_clicks: 0
+            children: Pause
   - dbc.Col:
       width:
         xs: 12

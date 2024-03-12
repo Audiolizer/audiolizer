@@ -1,3 +1,4 @@
+* adding pause button
 
 # 2024-03-12 17:13:21.857454: clock-in
 
