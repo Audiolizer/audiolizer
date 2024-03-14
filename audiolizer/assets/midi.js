@@ -33,11 +33,15 @@ function updateTimestampStore(timestamp) {
 }
 
 
+var isPlaying = false; // Tracks if the sequence is currently playing
+var audioContextTimeAtStart = 0; // When the playback was started
+var lastPauseTime = 0; // When the playback was paused
 
 
-function play_sequence(preset, notes){
+function play_sequence(preset, notes, startFrom = 0) {
     window['envelope'] = [];
     window['timeoutIDs'] = [];
+    audioContextTimeAtStart = audioContext.currentTime;
 
     const scheduleNote = (t, when, pitch, duration, volume) => {
         var timeoutID = setTimeout(() => {
@@ -50,9 +54,6 @@ function play_sequence(preset, notes){
         window['timeoutIDs'].push(timeoutID);
     };
 
-
-
-
     for (var n = 0; n < notes['when'].length; n++) {
         t = notes['t'][n]
         when = notes['when'][n];
@@ -60,20 +61,21 @@ function play_sequence(preset, notes){
         duration = notes['duration'][n];
         volume = notes['volume'][n];
 
+        if (when >= startFrom) {
+            // Schedule each note by calling the function that creates a closure
+            scheduleNote(t, when, pitch, duration, volume);
 
-        // Schedule each note by calling the function that creates a closure
-        scheduleNote(t, when, pitch, duration, volume);
-
-        var envelope = player.queueWaveTable(
-            audioContext,
-            audioContext.destination,
-            window[preset],
-            audioContext.currentTime + when,
-            Math.max(parseInt(pitch), 0),
-            Math.max(duration, 0),
-            Math.max(volume, 0)
-            );
-        window['envelope'].push(envelope);
+            var envelope = player.queueWaveTable(
+                audioContext,
+                audioContext.destination,
+                window[preset],
+                audioContext.currentTime + when,
+                Math.max(parseInt(pitch), 0),
+                Math.max(duration, 0),
+                Math.max(volume, 0)
+                );
+            window['envelope'].push(envelope);
+        }
     }
 }
 
@@ -101,28 +103,56 @@ function stop_sequence(){
     }
 }
 
+function loadAndPlaySequence(preset, path, notes, startFrom) {
+    if (typeof window[preset] !== 'undefined') {
+        console.log('Variable ' + preset + ' exists!');
+        play_sequence(preset, notes, startFrom);
+    } else {
+        console.log('Loading ' + preset + ' from ' + path);
+        player.loader.startLoad(audioContext, path, preset);
+        player.loader.waitLoad(function() {
+            instr = window[preset];
+            play_sequence(preset, notes, startFrom);
+        });
+    }
+}
+
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
         play: function(n_clicks, preset, path, notes) {
-            // stop any currently playing sequence
-            stop_sequence();
-            if (typeof window[preset] !== 'undefined') {
-                console.log('variable ' + preset + ' exists!');
-                play_sequence(preset, notes);
-            } else {
-            console.log('loading '+ preset + ' from ' + path);
-            player.loader.startLoad(audioContext, path, preset);
-            player.loader.waitLoad(function () {
-                instr=window[preset];
-                play_sequence(preset, notes);
+            if (n_clicks % 2 === 0) { // Even n_clicks: attempt to pause
+                if (isPlaying) {
+                    stop_sequence();
+                    lastPauseTime = audioContext.currentTime - audioContextTimeAtStart;
+                    isPlaying = false;
+                    console.log('Paused at: ', lastPauseTime, 'seconds');
+                }
+            } else { // Odd n_clicks: play or resume
+                if (!isPlaying) {
+                    if (lastPauseTime > 0) {
+                        // Resuming
+                        stop_sequence();
+                        console.log('Resuming at ', startFrom);
+                        startFrom = lastPauseTime;
+                        loadAndPlaySequence(preset, path, notes, startFrom);
+                    } else {
+                        // Starting fresh
+                        console.log('Playing');
+                        stop_sequence(); // Ensure any previous sequence is stopped
+                        startFrom = 0;
+                        loadAndPlaySequence(preset, path, notes, startFrom);
+                    }
+                    isPlaying = true;
+                }
+            } // This closing brace was missing, causing a potential syntax error
             return false;
-            });
-            }
         },
+
         stop: function(n_clicks){
             stop_sequence();
-            return n_clicks
+            lastPauseTime = 0;
+            return n_clicks;
         },
 
         updateFigure: function(data, timestamp_n_events, timestamp_event) {

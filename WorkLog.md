@@ -1,3 +1,4 @@
+* pause and resume
 
 # 2024-03-13 19:26:01.213262: clock-in
 

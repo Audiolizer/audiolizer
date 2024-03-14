@@ -97,66 +97,6 @@ player_settings:
                     children: Download MIDI
                     href: ''
                     download: ''
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - html.Button:
-            id: play
-            n_clicks: 0
-            children: Play
-        - html.Div:
-            id: play-time
-            style:
-              # display: none
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - html.Button:
-            id: pause
-            n_clicks: 0
-            children: Pause
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - html.Button:
-            id: stop
-            n_clicks: 0
-            children: stop
-        - html.Div:
-            id: stop-clicks
-            style:
-              display: none
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - dcc.Input:
-            id: timestamp-input
-            value: ''
-            # type: hidden
 
 date_settings:
   - dbc.Row:
@@ -410,6 +350,55 @@ layout:
               children: ${pitch_settings}
     - dbc.Row:
         id: debug
+    - dbc.Row:
+        children:
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
+                  id: play
+                  n_clicks: 0
+                  children: Play
+              - html.Div:
+                  id: play-time
+                  style:
+                    # display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
+                  id: stop
+                  n_clicks: 0
+                  children: stop
+              - html.Div:
+                  id: stop-clicks
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - dcc.Input:
+                  id: timestamp-input
+                  value: ''
+                  # type: hidden
     - dbc.Row:
         children:
           - dbc.Col:
