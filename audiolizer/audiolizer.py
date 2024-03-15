@@ -566,6 +566,12 @@ app.clientside_callback(
     Output('stop-clicks', 'children'),
     Input('stop', 'n_clicks'))
 
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='pause'),
+    Output('pause-clicks', 'children'),
+    Input('pause', 'n_clicks'))
+
+
 
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='play'),
@@ -607,7 +613,7 @@ if __name__ == '__main__':
         mode='external',
         debug=True,
         dev_tools_hot_reload=False,
-        extra_files=['../audiolizer.yaml']
+        extra_files=['../audiolizer.yaml', 'assets/midi.js']
         )
 # -
 

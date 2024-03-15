@@ -41,15 +41,15 @@ var lastPauseTime = 0; // When the playback was paused
 function play_sequence(preset, notes, startFrom = 0) {
     window['envelope'] = [];
     window['timeoutIDs'] = [];
+    lastPauseTime = audioContext.currentTime;
     audioContextTimeAtStart = audioContext.currentTime;
 
     const scheduleNote = (t, when, pitch, duration, volume) => {
         var timeoutID = setTimeout(() => {
             // console.log(`Playing note at timestamp: ${t}`);
-            
             // Call updateTimestampStore here to update the hidden input's value
+            lastPauseTime = audioContext.currentTime;
             updateTimestampStore(t);
-
         }, when * 1000); // Convert 'when' to milliseconds
         window['timeoutIDs'].push(timeoutID);
     };
@@ -63,13 +63,13 @@ function play_sequence(preset, notes, startFrom = 0) {
 
         if (when >= startFrom) {
             // Schedule each note by calling the function that creates a closure
-            scheduleNote(t, when, pitch, duration, volume);
+            scheduleNote(t, when - startFrom, pitch, duration, volume);
 
             var envelope = player.queueWaveTable(
                 audioContext,
                 audioContext.destination,
                 window[preset],
-                audioContext.currentTime + when,
+                audioContext.currentTime + when - startFrom,
                 Math.max(parseInt(pitch), 0),
                 Math.max(duration, 0),
                 Math.max(volume, 0)
@@ -103,6 +103,34 @@ function stop_sequence(){
     }
 }
 
+// function pause_sequence() {
+//     if (isPlaying) {
+//         stop_sequence();
+//         isPlaying = false;
+//         console.log('Paused at: ', lastPauseTime, 'seconds');
+//     }
+// }
+
+
+function resume_sequence(preset, path, notes) {
+    if (!isPlaying && lastPauseTime > 0) {
+        console.log('Resuming at: ', lastPauseTime, 'seconds');
+        
+        // Ensure clean state before resuming
+        stop_sequence(); 
+
+        // Calculate the correct 'startFrom' based on 'lastPauseTime'
+        // Consider recalculating 'audioContextTimeAtStart' if necessary
+        audioContextTimeAtStart = audioContext.currentTime - lastPauseTime;
+        loadAndPlaySequence(preset, path, notes, lastPauseTime);
+
+        isPlaying = true;
+    }
+}
+
+
+
+
 function loadAndPlaySequence(preset, path, notes, startFrom) {
     if (typeof window[preset] !== 'undefined') {
         console.log('Variable ' + preset + ' exists!');
@@ -121,21 +149,10 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
         play: function(n_clicks, preset, path, notes) {
-            if (n_clicks % 2 === 0) { // Even n_clicks: attempt to pause
-                if (isPlaying) {
-                    stop_sequence();
-                    lastPauseTime = audioContext.currentTime - audioContextTimeAtStart;
-                    isPlaying = false;
-                    console.log('Paused at: ', lastPauseTime, 'seconds');
-                }
-            } else { // Odd n_clicks: play or resume
                 if (!isPlaying) {
                     if (lastPauseTime > 0) {
                         // Resuming
-                        stop_sequence();
-                        console.log('Resuming at ', startFrom);
-                        startFrom = lastPauseTime;
-                        loadAndPlaySequence(preset, path, notes, startFrom);
+                        loadAndPlaySequence(preset, path, notes, lastPauseTime);
                     } else {
                         // Starting fresh
                         console.log('Playing');
@@ -144,14 +161,26 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                         loadAndPlaySequence(preset, path, notes, startFrom);
                     }
                     isPlaying = true;
+                } else {
+                    isPlaying = false;
                 }
-            } // This closing brace was missing, causing a potential syntax error
             return false;
+        },
+
+        pause: function(n_clicks){
+            stop_sequence();
+            isPlaying = false;
+            console.log('Paused at: ', lastPauseTime, 'seconds');
+  
+            return n_clicks;
+
         },
 
         stop: function(n_clicks){
             stop_sequence();
             lastPauseTime = 0;
+            isPlaying = false;
+
             return n_clicks;
         },
 

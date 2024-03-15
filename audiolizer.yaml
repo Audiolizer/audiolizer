@@ -379,6 +379,23 @@ layout:
             children:
               - html.Br:
               - html.Button:
+                  id: pause
+                  n_clicks: 0
+                  children: Pause
+              - html.Div:
+                  id: pause-clicks
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
                   id: stop
                   n_clicks: 0
                   children: stop
