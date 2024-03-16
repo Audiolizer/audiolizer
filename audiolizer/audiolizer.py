@@ -583,12 +583,21 @@ app.clientside_callback(
 
 
 app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='playFromClick'),
+    Output('on-click-display', 'children'),
+    Input('candlestick-chart', 'clickData'),
+    Input('instrument', 'value'),
+    Input('preset-path', 'children'),
+    Input('midi-data', 'data'))
+
+app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='updateFigure'),
     Output('candlestick-chart', 'figure'),
     Input('candlestick-data', 'data'),  # Assuming this is a dcc.Store or similar
     Input('timestamp-listener', 'n_events'),
     State('timestamp-listener', 'event')  # The input element where timestamp is stored
 )
+
 
 
 # app.clientside_callback(

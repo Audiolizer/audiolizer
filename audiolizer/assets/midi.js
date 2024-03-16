@@ -168,6 +168,28 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return false;
         },
 
+        playFromClick: function(clickData, preset, path, notes) {
+            let pointIndex = null;
+            const clickDataString = JSON.stringify(clickData);
+            stop_sequence();
+            let start = 0;
+            // Check if clickData and clickData.points exist and have at least one point
+            if (clickData && clickData.points && clickData.points.length > 0) {
+                // Convert clickData to a JSON string (if needed for other purposes)
+                // Safely access the pointIndex of the first point
+                pointIndex = clickData.points[0].pointIndex;
+                start = notes['when'][pointIndex]
+                lastPauseTime = start;
+                loadAndPlaySequence(preset, path, notes, start);
+                isPlaying = true;
+            } else {
+                // Handle the case where clickData is null or points key doesn't exist
+                console.log('No points data available in clickData.');
+            }
+
+            // Return pointIndex. Replace this with the appropriate Dash component update as needed
+            return clickDataString + JSON.stringify(pointIndex);
+        },
 
         pause: function(n_clicks){
             stop_sequence();

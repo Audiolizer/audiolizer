@@ -1,3 +1,4 @@
+* play on click after pause
 
 # 2024-03-16 15:33:50.378469: clock-in
 

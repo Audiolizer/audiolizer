@@ -477,6 +477,9 @@ layout:
         id: midi-display
     - html.Div:
         id: candlestick-data-render
+    - html.Div:
+        id: on-click-display
+        children: ''
     - dcc.Store:
         id: candlestick-data
     - dex.EventListener:
