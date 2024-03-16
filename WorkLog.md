@@ -1,3 +1,6 @@
+
+# 2024-03-15 20:55:52.058162: clock-in
+
 # 2024-03-15 15:31:59.762361: clock-out
 
 * adding pause button
