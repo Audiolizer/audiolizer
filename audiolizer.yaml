@@ -1,6 +1,6 @@
 import:
-  dcc: dash_core_components
-  html: dash_html_components
+  dcc: dash.dcc
+  html: dash.html
   daq: dash_daq
   dac: dash_audio_components
   dbc: dash_bootstrap_components
@@ -8,15 +8,18 @@ import:
 
 
 app:
-  jupyter_dash.JupyterDash:
+  dash.Dash:
     external_stylesheets:
       - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
+      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css"
+
     external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
       - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
       - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
+
     title: Market Audiolizer
     suppress_callback_exceptions: True
 
@@ -97,53 +100,6 @@ player_settings:
                     children: Download MIDI
                     href: ''
                     download: ''
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - html.Button:
-            id: play
-            n_clicks: 0
-            children: Play
-        - html.Div:
-            id: play-clicks
-            style:
-              display: none
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - html.Button:
-            id: stop
-            n_clicks: 0
-            children: stop
-        - html.Div:
-            id: stop-clicks
-            style:
-              display: none
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 3
-        xl: 3
-      children:
-        - html.Br:
-        - dcc.Input:
-            id: timestamp-input
-            value: ''
-            # type: hidden
 
 date_settings:
   - dbc.Row:
@@ -399,11 +355,117 @@ layout:
         id: debug
     - dbc.Row:
         children:
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
+                  id: play
+                  n_clicks: 0
+                  children: Play
+              - html.Div:
+                  id: play-time
+                  style:
+                    # display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
+                  id: pause
+                  n_clicks: 0
+                  children: Pause
+              - html.Div:
+                  id: pause-clicks
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - html.Button:
+                  id: stop
+                  n_clicks: 0
+                  children: stop
+              - html.Div:
+                  id: stop-clicks
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - html.Br:
+              - dcc.Input:
+                  id: timestamp-input
+                  value: ''
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: when-input
+                  value: ''
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: offset-input
+                  value: ''
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: lastPauseTime-input
+                  value: ''
+                  style:
+                    display: none
+    - dbc.Row:
+        children:
           - dbc.Col:
               children:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+    - dbc.Table:
+        id: notes-table
     - html.Div:
         id: data_dump
     - html.Div:
@@ -419,6 +481,16 @@ layout:
         id: candlestick-data
     - dex.EventListener:
         id: timestamp-listener
+        events:
+          - event: change
+            props:
+              - srcElement.value
+        logging: True
+        # children:
+        # - html.Div:
+        #     id: dummy-div
+    - dex.EventListener:
+        id: when-listener
         events:
           - event: change
             props:

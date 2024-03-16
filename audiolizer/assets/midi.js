@@ -23,34 +23,53 @@ var sound_library = {
 // queueWaveTable(audioContext, target, preset, when, pitch, duration, volume, slides)
 
 
-function updateTimestampStore(timestamp) {
-    const inputElement = document.getElementById('timestamp-input');
-    inputElement.value = timestamp; // Update the value
+var isPlaying = false; // Tracks if the sequence is currently playing
+var audioContextTimeAtStart = 0; // When the playback was started
+var lastPauseTime = 0; // When the playback was paused
+
+function updateTimestampStore(timestamp, when_, offset_, lastPauseTime_) {
+    const timestampInputElement = document.getElementById('timestamp-input');
+    timestampInputElement.value = timestamp; // Update the value
 
     // Manually trigger a "change" event for the input element
-    var event = new Event('change', { 'bubbles': true });
-    inputElement.dispatchEvent(event);
+    var timestampEvent = new Event('change', { 'bubbles': true });
+    timestampInputElement.dispatchEvent(timestampEvent);
+
+    const whenInputElement = document.getElementById('when-input');
+    whenInputElement.value = when_;
+
+    const offsetInputElement = document.getElementById('offset-input');
+    offsetInputElement.value = offset_;
+
+    const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+    lastPauseInputElement.value = lastPauseTime_;
 }
 
 
 
-
-function play_sequence(preset, notes){
+function play_sequence(preset, notes, startFrom = 0) {
     window['envelope'] = [];
     window['timeoutIDs'] = [];
+    audioContextTimeAtStart = audioContext.currentTime;
 
-    const scheduleNote = (t, when, pitch, duration, volume) => {
+    const scheduleNote = (t, when, pitch, duration, volume, offset, isLast) => {
         var timeoutID = setTimeout(() => {
-            // console.log(`Playing note at timestamp: ${t}`);
-            
-            // Call updateTimestampStore here to update the hidden input's value
-            updateTimestampStore(t);
-
+            // Here we log the current timestamp, audioContext's current time, and the 'when' value
+            console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
+            if (isLast) {
+                stop_sequence();
+                lastPauseTime = 0;
+                console.log('Stopped at end of sequence: ', lastPauseTime, 'seconds');
+                const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+                lastPauseInputElement.value = lastPauseTime;
+                isPlaying = false;
+            } else {
+                lastPauseTime = offset;
+            }
+            updateTimestampStore(t, when, offset, lastPauseTime);
         }, when * 1000); // Convert 'when' to milliseconds
         window['timeoutIDs'].push(timeoutID);
     };
-
-
 
 
     for (var n = 0; n < notes['when'].length; n++) {
@@ -59,21 +78,22 @@ function play_sequence(preset, notes){
         pitch = notes['pitch'][n];
         duration = notes['duration'][n];
         volume = notes['volume'][n];
+        isLast = n == notes['when'].length - 1;
+        if (when >= startFrom) {
+            // Schedule each note by calling the function that creates a closure
+            scheduleNote(t, when - startFrom, pitch, duration, volume, when, isLast);
 
-
-        // Schedule each note by calling the function that creates a closure
-        scheduleNote(t, when, pitch, duration, volume);
-
-        var envelope = player.queueWaveTable(
-            audioContext,
-            audioContext.destination,
-            window[preset],
-            audioContext.currentTime + when,
-            Math.max(parseInt(pitch), 0),
-            Math.max(duration, 0),
-            Math.max(volume, 0)
-            );
-        window['envelope'].push(envelope);
+            var envelope = player.queueWaveTable(
+                audioContext,
+                audioContext.destination,
+                window[preset],
+                audioContext.currentTime + when - startFrom,
+                Math.max(parseInt(pitch), 0),
+                Math.max(duration, 0),
+                Math.max(volume, 0)
+                );
+            window['envelope'].push(envelope);
+        }
     }
 }
 
@@ -102,27 +122,71 @@ function stop_sequence(){
 }
 
 
+function resume_sequence(preset, path, notes) {
+    if (!isPlaying && lastPauseTime > 0) {
+        console.log('Resuming at: ', lastPauseTime, 'seconds');
+        
+        // Ensure clean state before resuming
+        stop_sequence(); 
+
+        // Calculate the correct 'startFrom' based on 'lastPauseTime'
+        // Consider recalculating 'audioContextTimeAtStart' if necessary
+        loadAndPlaySequence(preset, path, notes, lastPauseTime);
+        isPlaying = true;
+    }
+}
+
+
+
+
+function loadAndPlaySequence(preset, path, notes, startFrom) {
+    if (typeof window[preset] !== 'undefined') {
+        console.log('Variable ' + preset + ' exists!');
+        play_sequence(preset, notes, startFrom);
+    } else {
+        console.log('Loading ' + preset + ' from ' + path);
+        player.loader.startLoad(audioContext, path, preset);
+        player.loader.waitLoad(function() {
+            instr = window[preset];
+            play_sequence(preset, notes, startFrom);
+        });
+    }
+}
+
+
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
         play: function(n_clicks, preset, path, notes) {
-            // stop any currently playing sequence
-            stop_sequence();
-            if (typeof window[preset] !== 'undefined') {
-                console.log('variable ' + preset + ' exists!');
-                play_sequence(preset, notes);
-            } else {
-            console.log('loading '+ preset + ' from ' + path);
-            player.loader.startLoad(audioContext, path, preset);
-            player.loader.waitLoad(function () {
-                instr=window[preset];
-                play_sequence(preset, notes);
-            return false;
-            });
+            if (n_clicks > 0) { // Check if n_clicks is greater than 0
+                if (!isPlaying) {
+                    loadAndPlaySequence(preset, path, notes, lastPauseTime);
+                    isPlaying = true;
+                } else {
+                    isPlaying = false;
+                }
             }
+            return false;
         },
+
+
+        pause: function(n_clicks){
+            stop_sequence();
+            isPlaying = false;
+            console.log('Paused at: ', lastPauseTime, 'seconds');
+  
+            return n_clicks;
+
+        },
+
         stop: function(n_clicks){
             stop_sequence();
-            return n_clicks
+            lastPauseTime = 0;
+            console.log('Stopped at: ', lastPauseTime, 'seconds');
+            const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+            lastPauseInputElement.value = lastPauseTime;
+            isPlaying = false;
+
+            return n_clicks;
         },
 
         updateFigure: function(data, timestamp_n_events, timestamp_event) {

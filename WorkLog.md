@@ -1,3 +1,33 @@
+# 2024-03-16 12:06:58.015767: clock-out
+
+* fixed pause, resume
+
+# 2024-03-16 10:35:16.632156: clock-in
+
+# 2024-03-15 22:25:24.149935: clock-out: T-30m 
+
+* fixing import warnings, logging
+
+# 2024-03-15 20:55:52.058162: clock-in
+
+# 2024-03-15 15:31:59.762361: clock-out
+
+* adding pause button
+
+# 2024-03-15 13:51:37.438675: clock-in
+
+# 2024-03-13 22:20:07.382619: clock-out: T-30m 
+
+* pause and resume
+
+# 2024-03-13 19:26:01.213262: clock-in
+
+# 2024-03-12 17:24:56.817417: clock-out
+
+* adding pause button
+
+# 2024-03-12 17:13:21.857454: clock-in
+
 * set merge defaults to False
 
 # 2024-03-11 00:44:59.425895: clock-out
