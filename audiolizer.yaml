@@ -418,7 +418,45 @@ layout:
               - dcc.Input:
                   id: timestamp-input
                   value: ''
-                  # type: hidden
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: when-input
+                  value: ''
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: offset-input
+                  value: ''
+                  style:
+                    display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+              - dcc.Input:
+                  id: lastPauseTime-input
+                  value: ''
+                  style:
+                    display: none
     - dbc.Row:
         children:
           - dbc.Col:
@@ -426,6 +464,8 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+    - dbc.Table:
+        id: notes-table
     - html.Div:
         id: data_dump
     - html.Div:
@@ -441,6 +481,16 @@ layout:
         id: candlestick-data
     - dex.EventListener:
         id: timestamp-listener
+        events:
+          - event: change
+            props:
+              - srcElement.value
+        logging: True
+        # children:
+        # - html.Div:
+        #     id: dummy-div
+    - dex.EventListener:
+        id: when-listener
         events:
           - event: change
             props:

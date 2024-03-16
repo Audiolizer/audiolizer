@@ -23,35 +23,50 @@ var sound_library = {
 // queueWaveTable(audioContext, target, preset, when, pitch, duration, volume, slides)
 
 
-function updateTimestampStore(timestamp) {
-    const inputElement = document.getElementById('timestamp-input');
-    inputElement.value = timestamp; // Update the value
-
-    // Manually trigger a "change" event for the input element
-    var event = new Event('change', { 'bubbles': true });
-    inputElement.dispatchEvent(event);
-}
-
-
 var isPlaying = false; // Tracks if the sequence is currently playing
 var audioContextTimeAtStart = 0; // When the playback was started
 var lastPauseTime = 0; // When the playback was paused
+
+function updateTimestampStore(timestamp, when_, offset_, lastPauseTime_) {
+    const timestampInputElement = document.getElementById('timestamp-input');
+    timestampInputElement.value = timestamp; // Update the value
+
+    // Manually trigger a "change" event for the input element
+    var timestampEvent = new Event('change', { 'bubbles': true });
+    timestampInputElement.dispatchEvent(timestampEvent);
+
+    const whenInputElement = document.getElementById('when-input');
+    whenInputElement.value = when_;
+
+    const offsetInputElement = document.getElementById('offset-input');
+    offsetInputElement.value = offset_;
+
+    const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+    lastPauseInputElement.value = lastPauseTime_;
+}
+
 
 
 function play_sequence(preset, notes, startFrom = 0) {
     window['envelope'] = [];
     window['timeoutIDs'] = [];
-    lastPauseTime = audioContext.currentTime;
     audioContextTimeAtStart = audioContext.currentTime;
 
-    const scheduleNote = (t, when, pitch, duration, volume) => {
+    const scheduleNote = (t, when, pitch, duration, volume, offset, isLast) => {
         var timeoutID = setTimeout(() => {
             // Here we log the current timestamp, audioContext's current time, and the 'when' value
             console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
-            
-            // Call updateTimestampStore here to update the hidden input's value
-            lastPauseTime = audioContext.currentTime;
-            updateTimestampStore(t);
+            if (isLast) {
+                stop_sequence();
+                lastPauseTime = 0;
+                console.log('Stopped at end of sequence: ', lastPauseTime, 'seconds');
+                const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+                lastPauseInputElement.value = lastPauseTime;
+                isPlaying = false;
+            } else {
+                lastPauseTime = offset;
+            }
+            updateTimestampStore(t, when, offset, lastPauseTime);
         }, when * 1000); // Convert 'when' to milliseconds
         window['timeoutIDs'].push(timeoutID);
     };
@@ -63,10 +78,10 @@ function play_sequence(preset, notes, startFrom = 0) {
         pitch = notes['pitch'][n];
         duration = notes['duration'][n];
         volume = notes['volume'][n];
-
+        isLast = n == notes['when'].length - 1;
         if (when >= startFrom) {
             // Schedule each note by calling the function that creates a closure
-            scheduleNote(t, when - startFrom, pitch, duration, volume);
+            scheduleNote(t, when - startFrom, pitch, duration, volume, when, isLast);
 
             var envelope = player.queueWaveTable(
                 audioContext,
@@ -116,9 +131,7 @@ function resume_sequence(preset, path, notes) {
 
         // Calculate the correct 'startFrom' based on 'lastPauseTime'
         // Consider recalculating 'audioContextTimeAtStart' if necessary
-        audioContextTimeAtStart = audioContext.currentTime - lastPauseTime;
         loadAndPlaySequence(preset, path, notes, lastPauseTime);
-
         isPlaying = true;
     }
 }
@@ -144,23 +157,17 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
         play: function(n_clicks, preset, path, notes) {
+            if (n_clicks > 0) { // Check if n_clicks is greater than 0
                 if (!isPlaying) {
-                    if (lastPauseTime > 0) {
-                        // Resuming
-                        loadAndPlaySequence(preset, path, notes, lastPauseTime);
-                    } else {
-                        // Starting fresh
-                        console.log('Playing');
-                        stop_sequence(); // Ensure any previous sequence is stopped
-                        startFrom = 0;
-                        loadAndPlaySequence(preset, path, notes, startFrom);
-                    }
+                    loadAndPlaySequence(preset, path, notes, lastPauseTime);
                     isPlaying = true;
                 } else {
                     isPlaying = false;
                 }
+            }
             return false;
         },
+
 
         pause: function(n_clicks){
             stop_sequence();
@@ -174,6 +181,9 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         stop: function(n_clicks){
             stop_sequence();
             lastPauseTime = 0;
+            console.log('Stopped at: ', lastPauseTime, 'seconds');
+            const lastPauseInputElement = document.getElementById('lastPauseTime-input');
+            lastPauseInputElement.value = lastPauseTime;
             isPlaying = false;
 
             return n_clicks;
