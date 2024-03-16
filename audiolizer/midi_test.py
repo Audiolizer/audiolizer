@@ -18,8 +18,8 @@ import json
 
 # +
 from jupyter_dash import JupyterDash
-import dash_core_components as dcc
-import dash_html_components as html
+import dash.dcc as dcc
+import dash.html as html
 import json
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -162,7 +162,6 @@ app.layout = html.Div([simple_pitch])
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0',
                    port=8051,
-                   mode='external',
                    debug=True)
 # -
 pwd

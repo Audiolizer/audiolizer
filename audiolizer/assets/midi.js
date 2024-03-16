@@ -46,13 +46,16 @@ function play_sequence(preset, notes, startFrom = 0) {
 
     const scheduleNote = (t, when, pitch, duration, volume) => {
         var timeoutID = setTimeout(() => {
-            // console.log(`Playing note at timestamp: ${t}`);
+            // Here we log the current timestamp, audioContext's current time, and the 'when' value
+            console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
+            
             // Call updateTimestampStore here to update the hidden input's value
             lastPauseTime = audioContext.currentTime;
             updateTimestampStore(t);
         }, when * 1000); // Convert 'when' to milliseconds
         window['timeoutIDs'].push(timeoutID);
     };
+
 
     for (var n = 0; n < notes['when'].length; n++) {
         t = notes['t'][n]
@@ -102,14 +105,6 @@ function stop_sequence(){
         console.log('no scheduled logs to cancel');
     }
 }
-
-// function pause_sequence() {
-//     if (isPlaying) {
-//         stop_sequence();
-//         isPlaying = false;
-//         console.log('Paused at: ', lastPauseTime, 'seconds');
-//     }
-// }
 
 
 function resume_sequence(preset, path, notes) {

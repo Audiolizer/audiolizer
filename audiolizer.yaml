@@ -1,6 +1,6 @@
 import:
-  dcc: dash_core_components
-  html: dash_html_components
+  dcc: dash.dcc
+  html: dash.html
   daq: dash_daq
   dac: dash_audio_components
   dbc: dash_bootstrap_components
@@ -8,15 +8,18 @@ import:
 
 
 app:
-  jupyter_dash.JupyterDash:
+  dash.Dash:
     external_stylesheets:
       - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
+      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css"
+
     external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
       - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
       - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
+
     title: Market Audiolizer
     suppress_callback_exceptions: True
 

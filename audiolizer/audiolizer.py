@@ -6,9 +6,9 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.4
+#       jupytext_version: 1.11.5
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -72,11 +72,11 @@ import audiogen_p3
 import itertools
 import sys
 
-import dash_html_components as html
+import dash.html as html
 
 from psidash.psidash import load_app
 
-import dash_core_components as dcc
+import dash.dcc as dcc
 
 from dash.dependencies import Input, Output, ClientsideFunction
 
@@ -168,7 +168,7 @@ frequencies = dict(
 frequency_marks = {np.log10(v): k for k,v in frequencies.items()}
 
 
-def pitch(freq):
+def pitch(freq, scale='chromatic'):
     """convert from frequency to pitch
 
     Borrowed from John D. Cook https://www.johndcook.com/blog/2016/02/10/musical-pitch-notation/
@@ -610,7 +610,6 @@ if __name__ == '__main__':
     app.run_server(
         host=conf['run_server']['host'],
         port=conf['run_server']['port'],
-        mode='external',
         debug=True,
         dev_tools_hot_reload=False,
         extra_files=['../audiolizer.yaml', 'assets/midi.js']
