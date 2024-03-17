@@ -1,3 +1,4 @@
+* hover and on click play working
 
 # 2024-03-17 13:19:27.841673: clock-in
 

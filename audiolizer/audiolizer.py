@@ -577,18 +577,27 @@ app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='play'),
     Output('midi-display', 'children'),
     Input('play', 'n_clicks'),
-    Input('instrument', 'value'),
-    Input('preset-path', 'children'),
-    Input('midi-data', 'data'))
+    State('instrument', 'value'),
+    State('preset-path', 'children'),
+    State('midi-data', 'data'),
+    State('candlestick-chart', 'selectedData'))
 
 
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='playFromClick'),
     Output('on-click-display', 'children'),
     Input('candlestick-chart', 'clickData'),
-    Input('instrument', 'value'),
-    Input('preset-path', 'children'),
-    Input('midi-data', 'data'))
+    State('instrument', 'value'),
+    State('preset-path', 'children'),
+    State('midi-data', 'data'))
+
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='playOnHover'),
+    Output('on-hover-display', 'children'),
+    Input('candlestick-chart', 'hoverData'),
+    State('instrument', 'value'),
+    State('preset-path', 'children'),
+    State('midi-data', 'data'))
 
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='updateFigure'),
