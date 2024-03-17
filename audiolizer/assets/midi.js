@@ -57,7 +57,7 @@ function play_sequence(preset, notes, startFrom = 0) {
             // Here we log the current timestamp, audioContext's current time, and the 'when' value
             console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
             if (isLast) {
-                stop_sequence();
+                // stop_sequence();
                 lastPauseTime = 0;
                 console.log('Stopped at end of sequence: ', lastPauseTime, 'seconds');
                 const lastPauseInputElement = document.getElementById('lastPauseTime-input');
@@ -78,7 +78,8 @@ function play_sequence(preset, notes, startFrom = 0) {
         pitch = notes['pitch'][n];
         duration = notes['duration'][n];
         volume = notes['volume'][n];
-        isLast = n == notes['when'].length - 1;
+        isLast = (notes['when'].length > 1) && (n == notes['when'].length - 1);
+
         if (when >= startFrom) {
             // Schedule each note by calling the function that creates a closure
             scheduleNote(t, when - startFrom, pitch, duration, volume, when, isLast);
@@ -156,7 +157,7 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
-        play: function(n_clicks, preset, path, notes) {
+        play: function(n_clicks, preset, path, notes, selectedData) {
             if (n_clicks > 0) { // Check if n_clicks is greater than 0
                 if (!isPlaying) {
                     loadAndPlaySequence(preset, path, notes, lastPauseTime);
@@ -166,6 +167,72 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 }
             }
             return false;
+        },
+
+        playFromClick: function(clickData, preset, path, notes) {
+            let pointIndex = null;
+            const clickDataString = JSON.stringify(clickData);
+            stop_sequence();
+            let start = 0;
+            // Check if clickData and clickData.points exist and have at least one point
+            if (clickData && clickData.points && clickData.points.length > 0) {
+                // Convert clickData to a JSON string (if needed for other purposes)
+                // Safely access the pointIndex of the first point
+                pointIndex = clickData.points[0].pointIndex;
+                start = notes['when'][pointIndex]
+                lastPauseTime = start;
+                loadAndPlaySequence(preset, path, notes, start);
+                isPlaying = true;
+            } else {
+                // Handle the case where clickData is null or points key doesn't exist
+                console.log('No points data available in clickData.');
+            }
+
+            // Return pointIndex. Replace this with the appropriate Dash component update as needed
+            return clickDataString + JSON.stringify(pointIndex);
+        },
+
+        playOnHover: function(hoverData, preset, path, notes) {
+            let pointIndex = null;
+            const hoverDataString = JSON.stringify(hoverData);
+
+            // Before playing, ensure the AudioContext is running
+            if (audioContext.state === 'suspended') {
+                return 'audioContext suspended';
+            }
+
+            stop_sequence();
+            let start = 0;
+            // Check if hoverData and hoverData.points exist and have at least one point
+            if (hoverData && hoverData.points && hoverData.points.length > 0) {
+                // Convert hoverData to a JSON string (if needed for other purposes)
+                // Safely access the pointIndex of the first point
+                pointIndex = hoverData.points[0].pointIndex;
+                // Access the pointIndex of the first hovered point
+                
+                // Construct a new notes object with only the hovered note
+                let singleNote = {
+                    't': [notes['t'][pointIndex]],
+                    'when': [notes['when'][pointIndex]],
+                    'pitch': [notes['pitch'][pointIndex]],
+                    'duration': [notes['duration'][pointIndex]],
+                    'volume': [notes['volume'][pointIndex]],  // Assuming volume is a parameter your system uses
+                    // Add any other necessary properties following the same pattern
+                };
+
+                // Use the 'when' value of the single note as the start time for play
+                let start = singleNote['when'][0];  // This should now be a single value in an array
+                lastPauseTime = start;
+                loadAndPlaySequence(preset, path, singleNote, start);
+                // we are only playing one note, so allow others to play
+                isPlaying = false;
+            } else {
+                // Handle the case where hoverData is null or points key doesn't exist
+                console.log('No points data available in hoverData.');
+            }
+
+            // Return pointIndex. Replace this with the appropriate Dash component update as needed
+            return hoverDataString + JSON.stringify(pointIndex);
         },
 
 
@@ -189,10 +256,11 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             return n_clicks;
         },
 
-        updateFigure: function(data, timestamp_n_events, timestamp_event) {
+        updateFigure: function(incomingData, timestamp_n_events, timestamp_event) {
             // Validate the presence of essential data
-            if (!data) {
-                return null; // or provide a default empty plot configuration
+            if (!incomingData) {
+                console.error("No data provided, skipping update.");
+                return;
             }
 
             // Initialize variables for constructing the plot
@@ -201,50 +269,75 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             var timestamp = timestamp_event && timestamp_event["srcElement.value"] ? timestamp_event["srcElement.value"] : null;
 
             // Prepare data arrays
-            const timeValues = Object.values(data.time);
+            const timeValues = Object.values(incomingData.time);
 
             // Find the index of the timestamp in the data, if a valid timestamp is provided
             const index = timestamp ? timeValues.indexOf(timestamp) : -1;
 
-            // Construct traces
-            var candlestickTrace = {
+            var traces = [{
                 type: 'candlestick',
                 x: timeValues,
-                close: Object.values(data.close),
-                high: Object.values(data.high),
-                low: Object.values(data.low),
-                open: Object.values(data.open),
+                close: Object.values(incomingData.close),
+                high: Object.values(incomingData.high),
+                low: Object.values(incomingData.low),
+                open: Object.values(incomingData.open),
                 increasing: {line: {color: '#17BECF'}},
                 decreasing: {line: {color: '#7F7F7F'}},
                 yaxis: 'y'
-            };
-
-            var volumeTrace = {
+            }, {
                 type: 'bar',
                 x: timeValues,
-                y: Object.values(data.volume),
+                y: Object.values(incomingData.volume),
                 marker: {
                     color: timeValues.map((_, i) => i === index ? highlightColor : defaultMarkerColor),
                 },
                 yaxis: 'y2'
-            };
+            }];
 
-            // Define the layout
             var layout = {
                 xaxis: { autorange: true, title: 'Time' },
-                yaxis: { title: `${data.base} price [${data.quote}]`, side: 'left', autorange: true },
-                yaxis2: { title: `${data.base} volume [${data.base}]`, overlaying: 'y', side: 'right', autorange: true },
-                dragmode: 'zoom',
+                yaxis: { title: `${incomingData.base} price [${incomingData.quote}]`, side: 'left', autorange: true },
+                yaxis2: { title: `${incomingData.base} volume [${incomingData.base}]`, overlaying: 'y', side: 'right', autorange: true },
+                dragmode: 'select',
+                hovermode: 'x',
                 margin: { l: 50, r: 50, t: 35, b: 35 },
                 showlegend: false
             };
 
             // Construct and return the plot configuration
             return {
-                data: [candlestickTrace, volumeTrace],
+                data: traces,
                 layout: layout
             };
+
+
+            // This style doesn't play well with the rest of the dash app
+            // const graphDiv = document.getElementById('candlestick-chart');
+
+            // // Check if the graphDiv has a data attribute set by Plotly
+            // if (graphDiv && graphDiv.data) {
+            //     // The div has Plotly data, indicating an existing plot
+            //     Plotly.newPlot(graphDiv, traces, layout)
+            //         .then(function() {
+            //             console.log('Plot updated');
+            //         })
+            //         .catch(function(error) {
+            //             console.error('Error updating plot:', error);
+            //         });
+            // } else {
+            //     // No Plotly plot data found, create a new plot
+            //     Plotly.newPlot(graphDiv, traces, layout)
+            //         .then(function() {
+            //             console.log('New plot created');
+            //         })
+            //         .catch(function(error) {
+            //             console.error('Error creating new plot:', error);
+            //         });
+            // }
+
+            // return timestamp;
         }
+
 
 
     }

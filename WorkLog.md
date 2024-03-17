@@ -1,3 +1,15 @@
+# 2024-03-17 17:07:32.652190: clock-out
+
+* hover and on click play working
+
+# 2024-03-17 13:19:27.841673: clock-in
+
+# 2024-03-16 16:40:59.043638: clock-out: T-30m 
+
+* play on click after pause
+
+# 2024-03-16 15:33:50.378469: clock-in
+
 # 2024-03-16 12:06:58.015767: clock-out
 
 * fixed pause, resume

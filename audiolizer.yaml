@@ -19,6 +19,7 @@ app:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
       - https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js
       - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
+      - https://cdn.plot.ly/plotly-2.30.0.min.js
 
     title: Market Audiolizer
     suppress_callback_exceptions: True
@@ -464,6 +465,13 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+                  config:
+                    staticPlot: False
+                    displaylogo: False
+                    modeBarButtonsToRemove: ['select2d', 'lasso2d']
+              - html.Div:
+                  id: candlestick-chart-dummy
+
     - dbc.Table:
         id: notes-table
     - html.Div:
@@ -471,12 +479,29 @@ layout:
     - html.Div:
         id: preset-path
         children: ''
+        style:
+          display: none
     - dcc.Store:
         id: midi-data
     - html.Div:
         id: midi-display
     - html.Div:
         id: candlestick-data-render
+    - html.Div:
+        id: on-click-display
+        children: ''
+        style:
+          display: none
+    - html.Div:
+        id: on-hover-display
+        children: ''
+        style:
+          display: none
+    - html.Div:
+        id: select-data-display
+        children: ''
+        style:
+          display: none
     - dcc.Store:
         id: candlestick-data
     - dex.EventListener:
