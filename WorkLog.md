@@ -1,3 +1,6 @@
+
+# 2024-03-17 13:19:27.841673: clock-in
+
 # 2024-03-16 16:40:59.043638: clock-out: T-30m 
 
 * play on click after pause
