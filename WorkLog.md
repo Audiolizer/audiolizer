@@ -1,3 +1,4 @@
+* play on drag select
 
 # 2024-03-17 19:34:48.288799: clock-in
 
