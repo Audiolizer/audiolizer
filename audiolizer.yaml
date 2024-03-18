@@ -488,6 +488,11 @@ layout:
     - html.Div:
         id: candlestick-data-render
     - html.Div:
+        id: on-select-display
+        children: ''
+        style:
+          display: none
+    - html.Div:
         id: on-click-display
         children: ''
         style:

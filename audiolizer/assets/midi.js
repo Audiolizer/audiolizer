@@ -5,6 +5,8 @@ var player=new WebAudioFontPlayer();
 var instr=null;
 var base = 'https://surikov.github.io/webaudiofontdata/sound/';
 
+
+
 player.loader.decodeAfterLoading(audioContext, '_tone_0250_SoundBlasterOld_sf2');
 
 var sound_library = {
@@ -55,11 +57,10 @@ function play_sequence(preset, notes, startFrom = 0) {
     const scheduleNote = (t, when, pitch, duration, volume, offset, isLast) => {
         var timeoutID = setTimeout(() => {
             // Here we log the current timestamp, audioContext's current time, and the 'when' value
-            console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
+            // console.log(`Timestamp: ${t}, AudioContext CurrentTime: ${audioContext.currentTime}, When: ${when}`);
             if (isLast) {
-                // stop_sequence();
                 lastPauseTime = 0;
-                console.log('Stopped at end of sequence: ', lastPauseTime, 'seconds');
+                // console.log('Stopped at end of sequence: ', lastPauseTime, 'seconds');
                 const lastPauseInputElement = document.getElementById('lastPauseTime-input');
                 lastPauseInputElement.value = lastPauseTime;
                 isPlaying = false;
@@ -101,51 +102,34 @@ function play_sequence(preset, notes, startFrom = 0) {
 function stop_sequence(){
     // Cancel all scheduled envelopes for sound playback
     if (typeof window['envelope'] !== 'undefined') {
-        console.log('stopping envelopes');
+        // console.log('stopping envelopes');
         window['envelope'].forEach(function(envelope) {
             envelope.cancel(); 
         });
         window['envelope'] = []; // Clear the envelopes array after stopping
     } else {
-        console.log('no envelopes to cancel');
+        // console.log('no envelopes to cancel');
     }
 
     // Clear all scheduled setTimeout calls to prevent logging
     if (typeof window['timeoutIDs'] !== 'undefined' && window['timeoutIDs'].length > 0) {
-        console.log('stopping scheduled logs');
+        // console.log('stopping scheduled logs');
         window['timeoutIDs'].forEach(function(timeoutID) {
             clearTimeout(timeoutID);
         });
         window['timeoutIDs'] = []; // Clear the timeoutIDs array after clearing timeouts
     } else {
-        console.log('no scheduled logs to cancel');
+        // console.log('no scheduled logs to cancel');
     }
 }
-
-
-function resume_sequence(preset, path, notes) {
-    if (!isPlaying && lastPauseTime > 0) {
-        console.log('Resuming at: ', lastPauseTime, 'seconds');
-        
-        // Ensure clean state before resuming
-        stop_sequence(); 
-
-        // Calculate the correct 'startFrom' based on 'lastPauseTime'
-        // Consider recalculating 'audioContextTimeAtStart' if necessary
-        loadAndPlaySequence(preset, path, notes, lastPauseTime);
-        isPlaying = true;
-    }
-}
-
-
 
 
 function loadAndPlaySequence(preset, path, notes, startFrom) {
     if (typeof window[preset] !== 'undefined') {
-        console.log('Variable ' + preset + ' exists!');
+        // console.log('Variable ' + preset + ' exists!');
         play_sequence(preset, notes, startFrom);
     } else {
-        console.log('Loading ' + preset + ' from ' + path);
+        // console.log('Loading ' + preset + ' from ' + path);
         player.loader.startLoad(audioContext, path, preset);
         player.loader.waitLoad(function() {
             instr = window[preset];
@@ -157,7 +141,7 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
-        play: function(n_clicks, preset, path, notes, selectedData) {
+        play: function(n_clicks, preset, path, notes) {
             if (n_clicks > 0) { // Check if n_clicks is greater than 0
                 if (!isPlaying) {
                     loadAndPlaySequence(preset, path, notes, lastPauseTime);
@@ -167,6 +151,54 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 }
             }
             return false;
+        },
+
+        playFromSelect: function(selectData, preset, path, notes) {
+            let pointIndexStart = null;
+            let pointIndexEnd = null;
+            const selectDataString = JSON.stringify(selectData);
+            let start = 0;
+            // Check if selectData and selectData.points exist and have at least one point
+            if (selectData && selectData.points && selectData.points.length > 0) {
+                stop_sequence();
+                // Convert selectData to a JSON string (if needed for other purposes)
+                // Safely access the pointIndex of the first and last points
+                pointIndexStart = selectData.points[0].pointIndex;
+                pointIndexEnd = selectData.points[selectData.points.length - 1].pointIndex; // Corrected to get the last pointIndex
+
+                // Construct a new notes object with notes ranging from pointIndexStart to pointIndexEnd
+                let selectedNotes = {
+                    't': [],
+                    'when': [],
+                    'pitch': [],
+                    'duration': [],
+                    'volume': [],
+                    // Add any other necessary properties following the same pattern
+                };
+
+                // Iterate from pointIndexStart to pointIndexEnd to fill selectedNotes
+                for (let i = pointIndexStart; i <= pointIndexEnd; i++) {
+                    selectedNotes['t'].push(notes['t'][i]);
+                    selectedNotes['when'].push(notes['when'][i]);
+                    selectedNotes['pitch'].push(notes['pitch'][i]);
+                    selectedNotes['duration'].push(notes['duration'][i]);
+                    selectedNotes['volume'].push(notes['volume'][i]);
+                    // Add any other necessary properties in the same way
+                }
+
+                start = selectedNotes['when'][0];
+
+                lastPauseTime = start;
+                // console.log("PLAY FROM SELECT, selectedNotes:", selectedNotes, "starting at", start);
+                loadAndPlaySequence(preset, path, selectedNotes, start); // Ensure you pass selectedNotes here
+                isPlaying = true;
+            } else {
+                // Handle the case where selectData is null or points key doesn't exist
+                // console.log('No points data available in selectData.');
+            }
+
+            // Return pointIndex. Replace this with the appropriate Dash component update as needed
+            return selectDataString + JSON.stringify({start: pointIndexStart, end: pointIndexEnd});
         },
 
         playFromClick: function(clickData, preset, path, notes) {
@@ -201,38 +233,44 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 return 'audioContext suspended';
             }
 
-            stop_sequence();
-            let start = 0;
-            // Check if hoverData and hoverData.points exist and have at least one point
-            if (hoverData && hoverData.points && hoverData.points.length > 0) {
-                // Convert hoverData to a JSON string (if needed for other purposes)
-                // Safely access the pointIndex of the first point
-                pointIndex = hoverData.points[0].pointIndex;
-                // Access the pointIndex of the first hovered point
-                
-                // Construct a new notes object with only the hovered note
-                let singleNote = {
-                    't': [notes['t'][pointIndex]],
-                    'when': [notes['when'][pointIndex]],
-                    'pitch': [notes['pitch'][pointIndex]],
-                    'duration': [notes['duration'][pointIndex]],
-                    'volume': [notes['volume'][pointIndex]],  // Assuming volume is a parameter your system uses
-                    // Add any other necessary properties following the same pattern
-                };
+            if (!isPlaying) {
+                console.log('not playing, proceeding onHover');
+                stop_sequence();
+                let start = 0;
+                // Check if hoverData and hoverData.points exist and have at least one point
+                if (hoverData && hoverData.points && hoverData.points.length > 0) {
+                    // Convert hoverData to a JSON string (if needed for other purposes)
+                    // Safely access the pointIndex of the first point
+                    pointIndex = hoverData.points[0].pointIndex;
+                    // Access the pointIndex of the first hovered point
+                    
+                    // Construct a new notes object with only the hovered note
+                    let singleNote = {
+                        't': [notes['t'][pointIndex]],
+                        'when': [notes['when'][pointIndex]],
+                        'pitch': [notes['pitch'][pointIndex]],
+                        'duration': [notes['duration'][pointIndex]],
+                        'volume': [notes['volume'][pointIndex]],  // Assuming volume is a parameter your system uses
+                        // Add any other necessary properties following the same pattern
+                    };
 
-                // Use the 'when' value of the single note as the start time for play
-                let start = singleNote['when'][0];  // This should now be a single value in an array
-                lastPauseTime = start;
-                loadAndPlaySequence(preset, path, singleNote, start);
-                // we are only playing one note, so allow others to play
-                isPlaying = false;
+                    // Use the 'when' value of the single note as the start time for play
+                    let start = singleNote['when'][0];  // This should now be a single value in an array
+                    lastPauseTime = start;
+                    loadAndPlaySequence(preset, path, singleNote, start);
+                    // we are only playing one note, so allow others to play
+                    isPlaying = false;
+                } else {
+                    // Handle the case where hoverData is null or points key doesn't exist
+                    console.log('No points data available in hoverData.');
+                }
+
+                // Return pointIndex. Replace this with the appropriate Dash component update as needed
+                return hoverDataString + JSON.stringify(pointIndex);
             } else {
-                // Handle the case where hoverData is null or points key doesn't exist
-                console.log('No points data available in hoverData.');
+                console.log("already playing, preventing onHover playback");
             }
 
-            // Return pointIndex. Replace this with the appropriate Dash component update as needed
-            return hoverDataString + JSON.stringify(pointIndex);
         },
 
 

@@ -1,3 +1,9 @@
+# 2024-03-17 20:44:18.135016: clock-out
+
+* play on drag select
+
+# 2024-03-17 19:34:48.288799: clock-in
+
 # 2024-03-17 17:07:32.652190: clock-out
 
 * hover and on click play working

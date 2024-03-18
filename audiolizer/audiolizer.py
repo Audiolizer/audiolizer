@@ -580,7 +580,17 @@ app.clientside_callback(
     State('instrument', 'value'),
     State('preset-path', 'children'),
     State('midi-data', 'data'),
-    State('candlestick-chart', 'selectedData'))
+    )
+
+
+app.clientside_callback(
+    ClientsideFunction(namespace='dash_midi', function_name='playFromSelect'),
+    Output('on-select-display', 'children'),
+    Input('candlestick-chart', 'selectedData'),
+    State('instrument', 'value'),
+    State('preset-path', 'children'),
+    State('midi-data', 'data'))
+
 
 
 app.clientside_callback(
