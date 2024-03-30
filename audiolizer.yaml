@@ -225,12 +225,14 @@ scale_settings:
       children:
         dbc.Col:
           width:
-            size: 10
+            size: 9
             offset: 1
           children:  
           - dbc.Checklist:
               id: price_type
               options:
+                - label: avg
+                  value: avg
                 - label: open
                   value: open
                 - label: close
@@ -240,7 +242,7 @@ scale_settings:
                 - label: low
                   value: low
               value:
-                - close
+                - avg
               inline: True
 
 duration_settings:

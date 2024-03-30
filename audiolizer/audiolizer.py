@@ -110,9 +110,11 @@ def refactor(df, frequency='1W'):
 
     open_ = df.open.groupby(pd.Grouper(freq=frequency)).first()
 
+    average = (open_ + close)/2
+
     volume = df.volume.groupby(pd.Grouper(freq=frequency)).sum()
 
-    return pd.DataFrame(dict(low=low, high=high, open=open_, close=close, volume=volume))
+    return pd.DataFrame(dict(low=low, high=high, open=open_, close=close, avg=average, volume=volume))
 
 def candlestick_plot(df, base, quote):
     return go.Figure(
@@ -381,6 +383,10 @@ def play(base, quote,
          # selectedData,
          price_type,
          ):
+
+    if len(price_type) == 0:
+        raise PreventUpdate
+
     t0 = time.perf_counter()
     # logger.info('timezone = {}'.format(timezone))
     ticker = '{}-{}'.format(base, quote)
@@ -456,8 +462,6 @@ def play(base, quote,
 
     duration = 60./tempo # length of the beat in seconds (tempo in beats per minute)
 
-    play_time = ''
-
     t1 = time.perf_counter()
     logger.info('time to set midi params {}'.format(t1-t0))
     t0 = t1
@@ -472,7 +476,7 @@ def play(base, quote,
     max_price = new_[price_type].values.ravel().max() # sets upper frequency bound
 
     amp_min = beat_quantile/100 # threshold amplitude to merge beats
-    min_vol = new_.volume.quantile(drop_quantile/100)
+    min_vol = new_.volume.quantile(drop_quantile/100) # threshold volume to silence
     
     
     t1 = time.perf_counter()
@@ -523,8 +527,8 @@ def play(base, quote,
     logger.info('time to generate audio {}'.format(t1-t0))
     t0 = t1
 
-    # need to rewrite for notes
-#     write_midi(beeps, tempo, 'assets/' + midi_file)
+    # consider how to generate this in memory
+    # write_midi(beeps, tempo, 'assets/' + midi_file)
 
     t1 = time.perf_counter()
     logger.info('time to write audio data {}'.format(t1-t0))
