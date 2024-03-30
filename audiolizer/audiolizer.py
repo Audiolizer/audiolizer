@@ -170,7 +170,7 @@ frequencies = dict(
 frequency_marks = {np.log10(v): k for k,v in frequencies.items()}
 
 
-def pitch(freq, scale='chromatic'):
+def pitch_from_freq(freq, scale='chromatic'):
     """convert from frequency to pitch
 
     Borrowed from John D. Cook https://www.johndcook.com/blog/2016/02/10/musical-pitch-notation/
@@ -181,7 +181,7 @@ def pitch(freq, scale='chromatic'):
     n = h % 12
     return name[n] + str(octave)
 
-def freq(note, A4=A4):
+def freq_from_pitch(note, A4=A4):
     """ convert from pitch to frequency
     
     based on https://gist.github.com/CGrassin/26a1fdf4fc5de788da9b376ff717516e
@@ -220,21 +220,23 @@ def get_beats(start, end, freq):
 
 
 # +
-def merge_pitches(beeps, amp_min):
+def merge_pitches(beeps):
     merged = []
     last_freq = 0
     last_amp = 0
     for t, freq, amp, dur in beeps:
-        if freq == last_freq:
-            if merged[-1][1] < amp_min:
-                # todo: use moving average
-                merged[-1][1] = (amp + last_amp)/2
-                merged[-1][2] += dur
-            continue
-        merged.append([t, freq, amp, dur])
-        last_freq = freq
-        last_amp = amp
+        # Check if merged is not empty and the current freq matches the last_freq
+        if merged and freq == last_freq:
+            # if merged[-1][2] < amp_min:  # Checking amplitude of the last entry in 'merged'
+            merged[-1][2] = (amp + last_amp) / 2  # Adjusting amplitude
+            merged[-1][3] += dur  # Extending duration
+            # Note: There's no 'else' block to handle other cases explicitly
+        else:
+            merged.append([t, freq, amp, dur])
+            last_freq = freq
+            last_amp = amp
     return merged
+
 
 def quiet(beeps, min_amp):
     silenced = []
@@ -377,9 +379,10 @@ def play(base, quote,
          start, end,
          cadence,
          log_freq_range,
-         drop_quantile, beat_quantile,
+         # drop_quantile, beat_quantile,
          tempo,
-         toggle_merge, silence,
+         toggle_merge,
+         # silence,
          # selectedData,
          price_type,
          ):
@@ -439,23 +442,23 @@ def play(base, quote,
         merged = 'merged'
     else:
         merged = ''
-    if silence:
-        silences = 'rests'
-    else:
-        silences = ''
+    # if silence:
+    #     silences = 'rests'
+    # else:
+    #     silences = ''
 
-    fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
+    fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
         ticker,
         '-'.join(price_type),
         start_.date(),
         end_.date(),
         cadence,
-        *['{}'.format(pitch(10**_).replace('#', 'sharp')) for _ in log_freq_range],
-        drop_quantile,
-        beat_quantile,
+        *['{}'.format(pitch_from_freq(10**_).replace('#', 'sharp')) for _ in log_freq_range],
+        # drop_quantile,
+        # beat_quantile,
         '{}bpm'.format(tempo),
         merged,
-        silences,
+        # silences,
     )
 
     midi_file = fname.split('.wav')[0] + '.midi'
@@ -475,8 +478,8 @@ def play(base, quote,
     min_price = new_[price_type].values.ravel().min() # sets lower frequency bound
     max_price = new_[price_type].values.ravel().max() # sets upper frequency bound
 
-    amp_min = beat_quantile/100 # threshold amplitude to merge beats
-    min_vol = new_.volume.quantile(drop_quantile/100) # threshold volume to silence
+    # amp_min = beat_quantile/100 # threshold amplitude to merge beats
+    # min_vol = new_.volume.quantile(drop_quantile/100) # threshold volume to silence
     
     
     t1 = time.perf_counter()
@@ -492,7 +495,7 @@ def play(base, quote,
         for t, (price, volume_) in new_[[price_type_, 'volume']].iterrows():
             if ~np.isnan(price):
                 freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-                freq_ = freq(pitch(freq_))
+                freq_ = freq_from_pitch(pitch_from_freq(freq_))
                 beep = t, midi_note(freq_), volume_/max_vol, duration
                 beeps.append(beep)
             else:
@@ -502,9 +505,10 @@ def play(base, quote,
                 logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
 
         if toggle_merge:
-            beeps = merge_pitches(beeps, amp_min)
-        if silence:
-            beeps = quiet(beeps, min_vol/max_vol)
+            beeps = merge_pitches(beeps)
+
+        # if silence:
+        #     beeps = quiet(beeps, min_vol/max_vol)
             
         dur0 = 0
         for t, freq_, amp_, dur_ in beeps:

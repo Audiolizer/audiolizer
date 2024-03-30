@@ -248,24 +248,24 @@ scale_settings:
 duration_settings:
   dbc.Row:
     children:
-    - dbc.Col:
-        width: 4
-        children:
-        - daq.NumericInput:
-            id: drop-quantile
-            min: 0
-            max: 100
-            value: 0
-            label: rest quantile
-    - dbc.Col:
-        width: 4
-        children:
-        - daq.NumericInput:
-            id: beat-quantile
-            min: 0
-            max: 100
-            value: 0
-            label: beat quantile
+    # - dbc.Col:
+    #     width: 4
+    #     children:
+    #     - daq.NumericInput:
+    #         id: drop-quantile
+    #         min: 0
+    #         max: 100
+    #         value: 0
+    #         label: rest quantile
+    # - dbc.Col:
+    #     width: 4
+    #     children:
+    #     - daq.NumericInput:
+    #         id: beat-quantile
+    #         min: 0
+    #         max: 100
+    #         value: 0
+    #         label: beat quantile
     - dbc.Col:
         width: 4
         children:
@@ -275,29 +275,14 @@ duration_settings:
             max: 240
             value: 240
             label: tempo BPM
-
-pitch_settings:
-  - dbc.Row:
-      children:
-      - dbc.Col:
-          width:
-            size: 3
-            offset: 2
-          children:
-          - daq.ToggleSwitch:
-              id: toggle-merge
-              label: merge
-              value: False
-              labelPosition: bottom
-      - dbc.Col:
-          width:
-            size: 3
-          children:
-          - daq.ToggleSwitch:
-              id: toggle-silence
-              label: rests
-              value: False
-              labelPosition: bottom
+    - dbc.Col:
+        width: 4
+        children:
+        - daq.ToggleSwitch:
+            id: toggle-merge
+            label: merge
+            value: False
+            labelPosition: top
 
 storage:
   dcc.Store:
@@ -347,13 +332,6 @@ layout:
               lg: 6
               xl: 3
               children: ${duration_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${pitch_settings}
     - dbc.Row:
         id: debug
     - dbc.Row:
@@ -585,16 +563,16 @@ callbacks:
         attr: value
       - id: frequency-drag
         attr: value
-      - id: drop-quantile
-        attr: value
-      - id: beat-quantile
-        attr: value
+      # - id: drop-quantile
+      #   attr: value
+      # - id: beat-quantile
+      #   attr: value
       - id: tempo
         attr: value
       - id: toggle-merge
         attr: value
-      - id: toggle-silence
-        attr: value
+      # - id: toggle-silence
+      #   attr: value
       # - id: candlestick-chart
       #   attr: selectedData
       - id: price_type
