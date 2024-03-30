@@ -1,3 +1,6 @@
+
+# 2024-03-30 09:42:25.594428: clock-in
+
 # 2024-03-29 19:18:12.338480: clock-out
 
 * added avg price, looking at merge logic
