@@ -171,15 +171,29 @@ frequency_marks = {np.log10(v): k for k,v in frequencies.items()}
 
 
 def pitch_from_freq(freq, scale='chromatic'):
-    """convert from frequency to pitch
+    """Convert from frequency to pitch, with optional rounding to C major scale."""
+    chromatic_scale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    c_major_scale = ["C", "D", "E", "F", "G", "A", "B"]
 
-    Borrowed from John D. Cook https://www.johndcook.com/blog/2016/02/10/musical-pitch-notation/
-    """
-    name = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     h = round(12*log2(freq/C0))
     octave = h // 12
     n = h % 12
-    return name[n] + str(octave)
+    pitch_name = chromatic_scale[n]
+
+    if scale.lower() == 'c major':
+        # Map chromatic scale notes to the nearest C major scale notes
+        # For simplicity, this maps sharp notes to their higher neighbor in the C major scale
+        nearest_c_major_note = {
+            "C#": "D",
+            "D#": "E",
+            "F#": "G",
+            "G#": "A",
+            "A#": "B"
+        }
+        # Replace the pitch name with the nearest C major note, if applicable
+        pitch_name = nearest_c_major_note.get(pitch_name, pitch_name)
+
+    return pitch_name + str(octave)
 
 def freq_from_pitch(note, A4=A4):
     """ convert from pitch to frequency
@@ -378,6 +392,7 @@ def get_sequence(beeps):
 def play(base, quote,
          start, end,
          cadence,
+         scale,
          log_freq_range,
          # drop_quantile, beat_quantile,
          tempo,
@@ -453,7 +468,7 @@ def play(base, quote,
         start_.date(),
         end_.date(),
         cadence,
-        *['{}'.format(pitch_from_freq(10**_).replace('#', 'sharp')) for _ in log_freq_range],
+        *['{}'.format(pitch_from_freq(10**_, scale).replace('#', 'sharp')) for _ in log_freq_range],
         # drop_quantile,
         # beat_quantile,
         '{}bpm'.format(tempo),
@@ -495,11 +510,12 @@ def play(base, quote,
         for t, (price, volume_) in new_[[price_type_, 'volume']].iterrows():
             if ~np.isnan(price):
                 freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-                freq_ = freq_from_pitch(pitch_from_freq(freq_))
+                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale))
                 beep = t, midi_note(freq_), volume_/max_vol, duration
                 beeps.append(beep)
             else:
                 freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
+                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale))
                 beep = t, midi_note(freq_), 0, duration
                 beeps.append(beep)
                 logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))

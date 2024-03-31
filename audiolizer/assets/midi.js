@@ -139,19 +139,33 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
 }
 
 function findClosestBeepIndex(notes, targetTimestamp) {
-    let closestBeepIndex = -1; // Start with -1 to signify 'not found' if no beep meets the criteria
-    let targetTime = new Date(targetTimestamp); // Convert target timestamp to Date object for comparison
+    let closestBeepIndex = -1;
+    // Ensure targetTimestamp is a string to safely use .includes()
+    let targetTimeString = String(targetTimestamp);
+
+    if (targetTimestamp.includes(':')) {
+        // convert from 2024-03-30 10:15 to 2024-03-30T10:15:00
+        targetTimeString = targetTimeString.replace(' ', 'T') + ':00';
+    }
+
+    // let clickTimestamp = new Date(clickData.points[0].x.replace(' ', 'T') + ':00');
+    // Standardize the target timestamp to include a time part, if missing
+    if (!targetTimeString.includes('T')) {
+        targetTimeString += "T00:00:00";
+    }
+    let targetTime = new Date(targetTimeString);
 
     for (let i = notes['t'].length - 1; i >= 0; i--) {
         let noteTimestamp = new Date(notes['t'][i]);
         if (noteTimestamp <= targetTime) {
             closestBeepIndex = i;
-            break; // Exit the loop once the last matching beep is found
+            break;
         }
     }
 
     return closestBeepIndex;
 }
+
 
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
@@ -176,8 +190,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             // Check if selectData and selectData.points exist and have at least one point
             if (selectData && selectData.points && selectData.points.length > 0) {
                 stop_sequence();
-                let selectStartTime = new Date(selectData.points[0].x.replace(' ', 'T') + ':00');
-                let selectEndTime = new Date(selectData.points[selectData.points.length - 1].x.replace(' ', 'T') + ':00');
+                let selectStartTime = selectData.points[0].x;
+                let selectEndTime = selectData.points[selectData.points.length - 1].x;
 
                 // Convert selectData to a JSON string (if needed for other purposes)
                 // Safely access the pointIndex of the first and last points
@@ -222,14 +236,16 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         playFromClick: function(clickData, preset, path, notes) {
             let pointIndex = null;
             const clickDataString = JSON.stringify(clickData);
+            console.log(clickDataString);
             stop_sequence();
             let start = 0;
 
             // Check if clickData and clickData.points exist and have at least one point
             if (clickData && clickData.points && clickData.points.length > 0) {
-                let clickTimestamp = new Date(clickData.points[0].x.replace(' ', 'T') + ':00'); // Assuming clickData.points[0].x is '2024-03-30 09:30'
+                // Assuming clickData.points[0].x is '2024-03-30 09:30'
+                let clickTimestamp = clickData.points[0].x;
                 let closestBeepIndex = findClosestBeepIndex(notes, clickTimestamp);
-                start = notes['when'][closestBeepIndex]
+                start = notes['when'][closestBeepIndex];
                 lastPauseTime = start;
                 loadAndPlaySequence(preset, path, notes, start);
                 isPlaying = true;
@@ -258,7 +274,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
 
                 if (hoverData && hoverData.points && hoverData.points.length > 0) {
                     // Assuming hoverData.points[0].x is the timestamp on the chart
-                    let hoverTimestamp = new Date(hoverData.points[0].x.replace(' ', 'T') + ':00'); // Assuming hoverData.points[0].x is '2024-03-30 09:30'
+                    let hoverTimestamp = hoverData.points[0].x;
 
                     let closestBeepIndex = findClosestBeepIndex(notes, hoverTimestamp);
 
@@ -277,6 +293,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                         isPlaying = false;  // Ensure you correctly manage this flag in your actual code
                     } else {
                         console.log('No corresponding beep found for hover timestamp.');
+                        console.log('hover data', hoverDataString);
+                        console.log('notes range', notes['t']);
                     }
                 } else {
                     console.log('No points data available in hoverData.');

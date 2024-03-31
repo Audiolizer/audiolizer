@@ -205,8 +205,25 @@ instrument_settings:
   - html.Div:
       id: out-component
       children: 'True'
+      style:
+        display: none
 
 scale_settings:
+  - dbc.Row:
+      children:
+        dbc.Col:
+          width:
+            size: 10
+          children:
+          - dcc.Dropdown:
+              id: scale
+              clearable: False
+              options:
+                - label: C Major
+                  value: c major
+                - label: Chromatic
+                  value: chromatic
+              value: c major
   - dbc.Row:
       children:
         dbc.Col:
@@ -560,6 +577,8 @@ callbacks:
       - id: date-range
         attr: end_date
       - id: cadence
+        attr: value
+      - id: scale
         attr: value
       - id: frequency-drag
         attr: value
