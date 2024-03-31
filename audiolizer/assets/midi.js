@@ -138,6 +138,35 @@ function loadAndPlaySequence(preset, path, notes, startFrom) {
     }
 }
 
+function findClosestBeepIndex(notes, targetTimestamp) {
+    let closestBeepIndex = -1;
+    // Ensure targetTimestamp is a string to safely use .includes()
+    let targetTimeString = String(targetTimestamp);
+
+    if (targetTimestamp.includes(':')) {
+        // convert from 2024-03-30 10:15 to 2024-03-30T10:15:00
+        targetTimeString = targetTimeString.replace(' ', 'T') + ':00';
+    }
+
+    // let clickTimestamp = new Date(clickData.points[0].x.replace(' ', 'T') + ':00');
+    // Standardize the target timestamp to include a time part, if missing
+    if (!targetTimeString.includes('T')) {
+        targetTimeString += "T00:00:00";
+    }
+    let targetTime = new Date(targetTimeString);
+
+    for (let i = notes['t'].length - 1; i >= 0; i--) {
+        let noteTimestamp = new Date(notes['t'][i]);
+        if (noteTimestamp <= targetTime) {
+            closestBeepIndex = i;
+            break;
+        }
+    }
+
+    return closestBeepIndex;
+}
+
+
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     dash_midi: {
@@ -161,10 +190,13 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             // Check if selectData and selectData.points exist and have at least one point
             if (selectData && selectData.points && selectData.points.length > 0) {
                 stop_sequence();
+                let selectStartTime = selectData.points[0].x;
+                let selectEndTime = selectData.points[selectData.points.length - 1].x;
+
                 // Convert selectData to a JSON string (if needed for other purposes)
                 // Safely access the pointIndex of the first and last points
-                pointIndexStart = selectData.points[0].pointIndex;
-                pointIndexEnd = selectData.points[selectData.points.length - 1].pointIndex; // Corrected to get the last pointIndex
+                pointIndexStart = findClosestBeepIndex(notes, selectStartTime);
+                pointIndexEnd = findClosestBeepIndex(notes, selectEndTime);
 
                 // Construct a new notes object with notes ranging from pointIndexStart to pointIndexEnd
                 let selectedNotes = {
@@ -204,14 +236,16 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         playFromClick: function(clickData, preset, path, notes) {
             let pointIndex = null;
             const clickDataString = JSON.stringify(clickData);
+            console.log(clickDataString);
             stop_sequence();
             let start = 0;
+
             // Check if clickData and clickData.points exist and have at least one point
             if (clickData && clickData.points && clickData.points.length > 0) {
-                // Convert clickData to a JSON string (if needed for other purposes)
-                // Safely access the pointIndex of the first point
-                pointIndex = clickData.points[0].pointIndex;
-                start = notes['when'][pointIndex]
+                // Assuming clickData.points[0].x is '2024-03-30 09:30'
+                let clickTimestamp = clickData.points[0].x;
+                let closestBeepIndex = findClosestBeepIndex(notes, clickTimestamp);
+                start = notes['when'][closestBeepIndex];
                 lastPauseTime = start;
                 loadAndPlaySequence(preset, path, notes, start);
                 isPlaying = true;
@@ -221,56 +255,53 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
             }
 
             // Return pointIndex. Replace this with the appropriate Dash component update as needed
-            return clickDataString + JSON.stringify(pointIndex);
+            return clickDataString
         },
 
         playOnHover: function(hoverData, preset, path, notes) {
-            let pointIndex = null;
-            const hoverDataString = JSON.stringify(hoverData);
-
             // Before playing, ensure the AudioContext is running
             if (audioContext.state === 'suspended') {
-                return 'audioContext suspended';
+                audioContext.resume().then(() => {
+                    console.log("AudioContext resumed successfully");
+                });
+                return;
             }
+            const hoverDataString = JSON.stringify(hoverData);
 
             if (!isPlaying) {
                 console.log('not playing, proceeding onHover');
                 stop_sequence();
-                let start = 0;
-                // Check if hoverData and hoverData.points exist and have at least one point
-                if (hoverData && hoverData.points && hoverData.points.length > 0) {
-                    // Convert hoverData to a JSON string (if needed for other purposes)
-                    // Safely access the pointIndex of the first point
-                    pointIndex = hoverData.points[0].pointIndex;
-                    // Access the pointIndex of the first hovered point
-                    
-                    // Construct a new notes object with only the hovered note
-                    let singleNote = {
-                        't': [notes['t'][pointIndex]],
-                        'when': [notes['when'][pointIndex]],
-                        'pitch': [notes['pitch'][pointIndex]],
-                        'duration': [notes['duration'][pointIndex]],
-                        'volume': [notes['volume'][pointIndex]],  // Assuming volume is a parameter your system uses
-                        // Add any other necessary properties following the same pattern
-                    };
 
-                    // Use the 'when' value of the single note as the start time for play
-                    let start = singleNote['when'][0];  // This should now be a single value in an array
-                    lastPauseTime = start;
-                    loadAndPlaySequence(preset, path, singleNote, start);
-                    // we are only playing one note, so allow others to play
-                    isPlaying = false;
+                if (hoverData && hoverData.points && hoverData.points.length > 0) {
+                    // Assuming hoverData.points[0].x is the timestamp on the chart
+                    let hoverTimestamp = hoverData.points[0].x;
+
+                    let closestBeepIndex = findClosestBeepIndex(notes, hoverTimestamp);
+
+                    if (closestBeepIndex !== -1) {
+                        let singleNote = {
+                            't': [notes['t'][closestBeepIndex]],
+                            'when': [notes['when'][closestBeepIndex]],
+                            'pitch': [notes['pitch'][closestBeepIndex]],
+                            'duration': [notes['duration'][closestBeepIndex]],
+                            'volume': [notes['volume'][closestBeepIndex]],  // Assuming volume is a parameter your system uses
+                        };
+
+                        let start = singleNote['when'][0];
+                        lastPauseTime = start;
+                        loadAndPlaySequence(preset, path, singleNote, start);
+                        isPlaying = false;  // Ensure you correctly manage this flag in your actual code
+                    } else {
+                        console.log('No corresponding beep found for hover timestamp.');
+                        console.log('hover data', hoverDataString);
+                        console.log('notes range', notes['t']);
+                    }
                 } else {
-                    // Handle the case where hoverData is null or points key doesn't exist
                     console.log('No points data available in hoverData.');
                 }
-
-                // Return pointIndex. Replace this with the appropriate Dash component update as needed
-                return hoverDataString + JSON.stringify(pointIndex);
             } else {
                 console.log("already playing, preventing onHover playback");
             }
-
         },
 
 
@@ -348,32 +379,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                 layout: layout
             };
 
-
-            // This style doesn't play well with the rest of the dash app
-            // const graphDiv = document.getElementById('candlestick-chart');
-
-            // // Check if the graphDiv has a data attribute set by Plotly
-            // if (graphDiv && graphDiv.data) {
-            //     // The div has Plotly data, indicating an existing plot
-            //     Plotly.newPlot(graphDiv, traces, layout)
-            //         .then(function() {
-            //             console.log('Plot updated');
-            //         })
-            //         .catch(function(error) {
-            //             console.error('Error updating plot:', error);
-            //         });
-            // } else {
-            //     // No Plotly plot data found, create a new plot
-            //     Plotly.newPlot(graphDiv, traces, layout)
-            //         .then(function() {
-            //             console.log('New plot created');
-            //         })
-            //         .catch(function(error) {
-            //             console.error('Error creating new plot:', error);
-            //         });
-            // }
-
-            // return timestamp;
         }
 
 

@@ -1,3 +1,21 @@
+# 2024-03-30 21:43:05.902288: clock-out
+
+* c major scale, fix bug in controls for monthly view
+
+# 2024-03-30 19:21:46.589832: clock-in
+
+# 2024-03-30 11:31:04.510556: clock-out
+
+* fixed merge button, simplified interface
+
+# 2024-03-30 09:42:25.594428: clock-in
+
+# 2024-03-29 19:18:12.338480: clock-out
+
+* added avg price, looking at merge logic
+
+# 2024-03-29 17:39:55.071871: clock-in
+
 # 2024-03-17 20:44:18.135016: clock-out
 
 * play on drag select
