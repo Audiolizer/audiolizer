@@ -1,3 +1,6 @@
+
+# 2024-04-01 16:06:50.944673: clock-in
+
 # 2024-04-01 14:34:01.569842: clock-out
 
 * testing scale mapping
