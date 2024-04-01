@@ -565,8 +565,8 @@ def play(base, quote,
 
     return (candlestick_data,
             notes,
-            midi_asset,
-            midi_asset,
+            # midi_asset,
+            # midi_asset,
             '',
             )
 

@@ -22,6 +22,7 @@ services:
     working_dir: /home/audiolizer/audiolizer
 
   audiolizer-dev:
+    build: .
     image: apembroke/audiolizer:0.4.11
     ports:
       - "8050:8050"

@@ -93,14 +93,14 @@ player_settings:
                 width: 12
                 children:
                 - 'midi player'
-            - dbc.Col:
-                width: 12
-                children:
-                - html.A:
-                    id: midi_download
-                    children: Download MIDI
-                    href: ''
-                    download: ''
+            # - dbc.Col:
+            #     width: 12
+            #     children:
+            #     - html.A:
+            #         id: midi_download
+            #         children: Download MIDI
+            #         href: ''
+            #         download: ''
 
 date_settings:
   - dbc.Row:
@@ -601,10 +601,10 @@ callbacks:
         attr: data
       - id: midi-data
         attr: data
-      - id: midi_download
-        attr: href
-      - id: midi_download
-        attr: download
+      # - id: midi_download
+      #   attr: href
+      # - id: midi_download
+      #   attr: download
       - id: loading-output
         attr: children
 
