@@ -26,9 +26,12 @@ app:
 
 
 A0: 1.4393326938302626 # low A (log10)
+E2: 1.915963520298233 # low E guitar
 C3: 2.116650241674698
 C5: 2.7187101500034196
+E6: 3.1200835029541576 # high E guitar
 C8: 3.6217992240026677 # high C (log10)
+
 
 run_server:
   host: '0.0.0.0'
@@ -78,29 +81,29 @@ player_settings:
               - html.Div:
                   id: loading-output
                   children: loading output
-  - dbc.Col:
-      width:
-        xs: 12
-        sm: 12
-        md: 12
-        lg: 4
-        xl: 4
-      children:
-        - html.Br:
-        - dbc.Row:
-            children:
-            - dbc.Col:
-                width: 12
-                children:
-                - 'midi player'
-            # - dbc.Col:
-            #     width: 12
-            #     children:
-            #     - html.A:
-            #         id: midi_download
-            #         children: Download MIDI
-            #         href: ''
-            #         download: ''
+  # - dbc.Col:
+  #     width:
+  #       xs: 12
+  #       sm: 12
+  #       md: 12
+  #       lg: 4
+  #       xl: 4
+  #     children:
+  #       - html.Br:
+  #       - dbc.Row:
+  #           children:
+  #           - dbc.Col:
+  #               width: 12
+  #               children:
+  #               - 'midi player'
+  #           - dbc.Col:
+  #               width: 12
+  #               children:
+  #               - html.A:
+  #                   id: midi_download
+  #                   children: Download MIDI
+  #                   href: ''
+  #                   download: ''
 
 date_settings:
   - dbc.Row:
@@ -220,10 +223,16 @@ scale_settings:
               clearable: False
               options:
                 - label: C Major
-                  value: c major
+                  value: 'C,D,E,F,G,A,B'
+                - label: E Phrygian Dominant
+                  value: 'E,F,G#,A,B,C,D'
+                - label: A Harmonic Minor
+                  value: 'A,B,C,D,E,F,G#'
+                - label: A Blues
+                  value: 'A,C,D,D#,E,G'
                 - label: Chromatic
-                  value: chromatic
-              value: c major
+                  value: 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B'
+              value: 'C,D,E,F,G,A,B'
   - dbc.Row:
       children:
         dbc.Col:
@@ -236,8 +245,8 @@ scale_settings:
               max: ${C8}
               step: .1
               value:
-                - ${C3}
-                - ${C5}
+                - ${E2}
+                - ${E6}
   - dbc.Row:
       children:
         dbc.Col:
