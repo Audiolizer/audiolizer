@@ -170,28 +170,70 @@ frequencies = dict(
 frequency_marks = {np.log10(v): k for k,v in frequencies.items()}
 
 
-def pitch_from_freq(freq, scale='chromatic'):
+def chromatic_pitch(frequency):
+    """determine octave and chromatic note
+
+    note will be a float so we can round to match scale
+    """
+    h = 12*math.log2(frequency/C0)
+    octave = int(h//12)
+    n = h % 12 # nth note
+    return octave, n
+
+chromatic_scale = {
+    'B#': 0, # B sharp is the same as C
+    'C': 0,
+    'C#': 1,
+    'Db': 1,
+    'D': 2,
+    'D#': 3,
+    'Eb': 3,
+    'E': 4, # E is the same as F flat
+    'Fb': 4,
+    'E#': 5, # F is the same as E sharp
+    'F': 5,
+    'F#': 6,
+    'Gb': 6,
+    'G': 7,
+    'G#': 8,
+    'Ab': 8,
+    'A': 9,
+    'A#': 10,
+    'Bb': 10,
+    'B': 11, # B is the same as C flat
+    'Cb': 11,}
+
+
+
+def get_scale(notes):
+    """converts list of notes to {note value: pitch}
+    note values range from [0, 11] in equal temperament
+    """
+    return {chromatic_scale[_]: _ for _ in notes}
+
+def get_scale_note(note_value, scale):
+    """finds the closest note in the scale to a given note value
+    note values should be a float the range [0, 11]
+    """
+    min_diff = 12
+    closest_note = 0
+    for note, name in scale.items():
+        diff = abs(note_value - note)
+        if diff < min_diff:
+            closest_note = note
+            min_diff = diff
+    return closest_note
+
+def pitch_from_freq(frequency, scale_notes='C,C#,D,D#,E,F,F#,G,G#,A,A#,B'):
     """Convert from frequency to pitch, with optional rounding to C major scale."""
-    chromatic_scale = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-    c_major_scale = ["C", "D", "E", "F", "G", "A", "B"]
+    scale_notes = scale_notes.split(',')
+    scale = get_scale(scale_notes)
 
-    h = round(12*log2(freq/C0))
-    octave = h // 12
-    n = h % 12
-    pitch_name = chromatic_scale[n]
+    octave, note = chromatic_pitch(frequency)
 
-    if scale.lower() == 'c major':
-        # Map chromatic scale notes to the nearest C major scale notes
-        # For simplicity, this maps sharp notes to their higher neighbor in the C major scale
-        nearest_c_major_note = {
-            "C#": "D",
-            "D#": "E",
-            "F#": "G",
-            "G#": "A",
-            "A#": "B"
-        }
-        # Replace the pitch name with the nearest C major note, if applicable
-        pitch_name = nearest_c_major_note.get(pitch_name, pitch_name)
+    n = get_scale_note(note, scale)
+
+    pitch_name = scale[n]
 
     return pitch_name + str(octave)
 
@@ -565,8 +607,8 @@ def play(base, quote,
 
     return (candlestick_data,
             notes,
-            midi_asset,
-            midi_asset,
+            # midi_asset,
+            # midi_asset,
             '',
             )
 

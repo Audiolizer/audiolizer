@@ -1,3 +1,15 @@
+# 2024-04-01 17:55:50.474543: clock-out
+
+* added a blues, harmonic, and phrygian scales
+
+# 2024-04-01 16:06:50.944673: clock-in
+
+# 2024-04-01 14:34:01.569842: clock-out
+
+* testing scale mapping
+
+# 2024-04-01 13:14:59.049831: clock-in
+
 # 2024-03-30 21:43:05.902288: clock-out
 
 * c major scale, fix bug in controls for monthly view
