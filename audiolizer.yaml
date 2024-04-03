@@ -222,6 +222,8 @@ scale_settings:
               id: scale
               clearable: False
               options:
+                - label: D Dorian
+                  value: 'D,E,F,G,A,B,C'
                 - label: C Major
                   value: 'C,D,E,F,G,A,B'
                 - label: E Phrygian Dominant
@@ -307,7 +309,7 @@ duration_settings:
         - daq.ToggleSwitch:
             id: toggle-merge
             label: merge
-            value: False
+            value: True
             labelPosition: top
 
 storage:

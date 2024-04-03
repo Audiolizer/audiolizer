@@ -1,3 +1,5 @@
+* add dorian scale
+
 # 2024-04-01 17:55:50.474543: clock-out
 
 * added a blues, harmonic, and phrygian scales
