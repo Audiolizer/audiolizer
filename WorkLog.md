@@ -1,3 +1,4 @@
+* adding mongodb, oauth requirements
 
 # 2024-04-03 19:31:28.321408: clock-in
 
