@@ -1,5 +1,8 @@
 # ignore these files
 
+.env
 */assets/*.wav
 */history/*.csv
 */hourly-outputs/*
+
+client_secret_*

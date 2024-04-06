@@ -12,13 +12,16 @@ services:
     ports:
       - "8080:8080"
     environment:
-      AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
       PYTHONUNBUFFERED: 1
+      AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
+      APP_SECRET: ${APP_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     command: ["gunicorn", "--workers=1", "--bind", "0.0.0.0:8080", "audiolizer:server"]
-    volumes:
-      - type: bind
-        source: ${PWD}
-        target: /home/audiolizer
+    # volumes:
+    #   - type: bind
+    #     source: ${PWD}
+    #     target: /home/audiolizer
     working_dir: /home/audiolizer/audiolizer
 
   audiolizer-dev:
@@ -27,8 +30,31 @@ services:
     ports:
       - "8050:8050"
     environment:
+      PYTHONUNBUFFERED: 1
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
+      APP_SECRET: ${APP_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     command: ["python", "audiolizer.py"] # runs on port 8051
+    volumes:
+      - type: bind
+        source: ${PWD}
+        target: /home/audiolizer
+    working_dir: /home/audiolizer/audiolizer
+
+  test-login:
+    build: .
+    image: apembroke/audiolizer:0.4.11
+    ports:
+      - "8050:8050"
+    environment:
+      PYTHONUNBUFFERED: 1
+      AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
+      APP_SECRET: ${APP_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
+    command: ["python", "test_login.py"] # runs on port 8051
     volumes:
       - type: bind
         source: ${PWD}
@@ -42,27 +68,33 @@ services:
       - "8888:8888"
     environment:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      APP_SECRET: ${APP_SECRET}
     command: ["jupyter", "notebook", ".", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - type: bind
         source: ${PWD}
         target: /home/audiolizer
     working_dir: /home/audiolizer
+    depends_on:
+      - mongo
+
 
   mongo:
     image: mongo:6
     container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootuser
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_DATABASE: mydatabase
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongo_data:/data/db
 
 volumes:
   mongo_data:
-    driver: local
 
 
 

@@ -1,99 +1,88 @@
-# ---
-# jupyter:
-#   jupytext:
-#     formats: py:light
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.11.5
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
 
-# +
+import glob
+import itertools
+import json
 import logging
+import math
+import os
+import sys
+import time
+from collections import defaultdict
+from datetime import datetime
+
+import audiogen_p3
+import dash
+import dash.dcc as dcc
+import dash.html as html
+import flask
+import numpy as np
+import pandas as pd
+import plotly.graph_objs as go
+from dash.dependencies import ClientsideFunction, Input, Output
+from dash.exceptions import PreventUpdate
+from dash_extensions import EventListener
+from dash_extensions.enrich import DashProxy, State
+from flask_dance.contrib.google import google, make_google_blueprint
+from history import get_granularity, get_history, get_today_GMT
+from Historic_Crypto import Cryptocurrencies
+from midi_loader import instrument_paths, instrument_pitches, instruments
+from midiutil import MIDIFile
+from plotly.offline import plot
+from psidash.psidash import (assign_callbacks, get_callbacks, load_app,
+                             load_components, load_conf, load_dash)
+
+import glob
+import itertools
+import json
+import logging
+import math
+import os
+import sys
+import time
+from collections import defaultdict
+from datetime import datetime
+
+import audiogen_p3
+import dash
+import dash.dcc as dcc
+import dash.html as html
+import flask
+import numpy as np
+import pandas as pd
+import plotly.graph_objs as go
+from dash.dependencies import ClientsideFunction, Input, Output
+from dash.exceptions import PreventUpdate
+from dash_extensions import EventListener
+from dash_extensions.enrich import DashProxy, State
+from flask_dance.contrib.google import google, make_google_blueprint
+from history import get_granularity, get_history, get_today_GMT
+from Historic_Crypto import Cryptocurrencies
+from midi_loader import instrument_paths, instrument_pitches, instruments
+from midiutil import MIDIFile
+from plotly.offline import plot
+from psidash.psidash import (assign_callbacks, get_callbacks, load_app,
+                             load_components, load_conf, load_dash)
+
+# Configuration and logger setup
 logging.basicConfig(filename='audiolizer.log')
 logger = logging.getLogger(__name__)
-
 logger.setLevel(logging.DEBUG)
-# -
 
-import time
-
-import math
-import json
-
-import pandas as pd
-import numpy as np
-import os
-from plotly.offline import plot
-
-from history import get_history, get_today_GMT, get_granularity
-
-from midi_loader import instruments, instrument_paths, instrument_pitches
-
-import json
-
-from dash_extensions.enrich import DashProxy, html, Input, Output, State, dcc
-from dash_extensions import EventListener
-from dash.exceptions import PreventUpdate
-
-from Historic_Crypto import Cryptocurrencies
-
-import flask
-
-data = Cryptocurrencies(coin_search = '', extended_output=True).find_crypto_pairs()
-
+# Crypto data
+data = Cryptocurrencies(coin_search='', extended_output=True).find_crypto_pairs()
 crypto_dict = {}
 for base, group in data.groupby('base_currency'):
     crypto_dict[base] = list(group.quote_currency.unique())
 
-import os
-import pandas as pd
-
-from midiutil import MIDIFile
-
+# Environment variables and thresholds
 audiolizer_temp_dir = os.environ.get('AUDIOLIZER_TEMP', './history/')
 logger.info('audiolizer temp data:{}'.format(audiolizer_temp_dir))
-granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300)) # seconds
-
-# wav_threshold, midi_threshold, price_threshold,
-wav_threshold = int(os.environ.get('AUDIOLIZER_WAV_CACHE_SIZE', 100)) # megabytes
+granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300))  # seconds
+wav_threshold = int(os.environ.get('AUDIOLIZER_WAV_CACHE_SIZE', 100))  # megabytes
 midi_threshold = int(os.environ.get('AUDIOLIZER_MIDI_CACHE_SIZE', 10))
 price_threshold = int(os.environ.get('AUDIOLIZER_PRICE_CACHE_SIZE', 100))
 
 logger.info('cache sizes: \n wav:{}Mb\n midi:{}Mb\n price:{}Mb'.format(wav_threshold, midi_threshold, price_threshold))
-
-# +
-import audiogen_p3
-import itertools
-import sys
-
-import dash.html as html
-
-from psidash.psidash import load_app
-
-import dash.dcc as dcc
-
-from dash.dependencies import Input, Output, ClientsideFunction
-
-from datetime import datetime
-
-import plotly.graph_objs as go
-
-from psidash.psidash import get_callbacks, load_conf, load_dash, load_components, assign_callbacks
-
-from math import log2
-
-import glob
-from collections import defaultdict
-
-from dash.dependencies import Input, Output, ClientsideFunction
-
-app = DashProxy()
 
 
 def refactor(df, frequency='1W'):
@@ -356,18 +345,36 @@ def clear_files(fname_glob="assets/*.wav", max_storage=10e6):
 
 conf = load_conf('../audiolizer.yaml')
 
-# app = dash.Dash(__name__, server=server) # call flask server
-
-
 server = flask.Flask(__name__) # define flask app.server
+
+# Replace client_id and client_secret with your own
+google_bp = make_google_blueprint(
+    client_id=os.environ['GOOGLE_CLIENT_ID'],
+    client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+    scope=["openid"],
+    redirect_to="post_login",
+)
+server.register_blueprint(google_bp, url_prefix="/login")
 
 conf['app']['server'] = server
 
 app = load_dash(__name__, conf['app'], conf.get('import'))
 
-# app = dash.Dash(__name__, server=server) # call flask server
+app.secret_key = os.environ['APP_SECRET'] 
 
-# app = dash.Dash(__name__, server=server) # how we need to initialize
+
+@server.route("/")
+def index():
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+    resp = google.get("/oauth2/v1/userinfo")
+    assert resp.ok, resp.text
+    return "You are {email} on Google".format(email=resp.json()["email"])
+
+@server.route("/post_login")
+def post_login():
+    return "Successfully authenticated with Google!"
+
 
 app.layout = load_components(conf['layout'], conf.get('import'))
 
@@ -613,20 +620,6 @@ def play(base, quote,
             )
 
 
-# @app.callback(Output("log", "children"),
-#               Input("timestamp-listener", "n_events"),
-#               State("timestamp-listener", "event"))
-# def timestamp_event(n_events, e):
-#     if e is None:
-#         raise PreventUpdate()
-#     return f"Event is '{e['srcElement.value']}' (Event count: {n_events})"
-
-# @callbacks.render_selected_data
-# def render_selected_data(data):
-#     # Convert JSON data to a formatted string
-#     formatted_json = "```json\n" + json.dumps(data, indent=4) + "\n```"
-#     return formatted_json
-
 app.clientside_callback(
     ClientsideFunction(namespace='dash_midi', function_name='stop'),
     Output('stop-clicks', 'children'),
@@ -682,20 +675,6 @@ app.clientside_callback(
     Input('timestamp-listener', 'n_events'),
     State('timestamp-listener', 'event')  # The input element where timestamp is stored
 )
-
-
-
-# app.clientside_callback(
-#     """
-#     function(timestamp) {
-#         // Logic to convert timestamp to selectedData format
-#         return newSelectedData;
-#     }
-#     """,
-#     Output('candlestick-chart', 'selectedData'),
-#     [Input('timestamp-store', 'data')]
-# )
-
 
 
 server = app.server

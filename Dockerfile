@@ -25,6 +25,8 @@ WORKDIR /home/audiolizer/audiolizer
 RUN jupyter nbextension enable --py jupytext
 RUN jupyter nbextension install --py jupytext
 
+RUN pip install --upgrade dash
+
 ENV AUDIOLIZER_TEMP /home/audiolizer/audiolizer/history
 
 # # CMD jupyter notebook audiolizer/audiolizer.py --port=8888 --no-browser --ip=0.0.0.0 --allow-root
