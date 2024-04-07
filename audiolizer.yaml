@@ -43,6 +43,17 @@ run_server:
   dev_tools_hot_reload: False
 
 
+
+login_layout:
+  html.Div:
+    children:
+    - html.H2: Login Required
+    - html.A:
+        children: Login with Google
+        href: /login/google
+        className: login-button
+
+
 nav:
   dbc.Navbar:
     color: dark
@@ -317,7 +328,15 @@ storage:
   dcc.Store:
     id: midi-data
 
+
 layout:
+  html.Div:
+    children:
+    - html.Div:
+        id:
+
+
+main_layout:
   dbc.Container:
     fluid: True
     children:
@@ -543,6 +562,14 @@ layout:
 
 
 callbacks:
+  display_layout:
+    input:
+      - id: dummy-div
+        attr: children
+    output:
+      - id: page-content
+        attr: children
+
   update_base_options:
     input:
       - id: url

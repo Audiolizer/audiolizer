@@ -18,50 +18,17 @@ import flask
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from dash.dependencies import ClientsideFunction, Input, Output
+from dash.dependencies import ClientsideFunction, Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_extensions import EventListener
-from dash_extensions.enrich import DashProxy, State
+from dash_extensions.enrich import DashProxy
 from flask_dance.contrib.google import google, make_google_blueprint
 from history import get_granularity, get_history, get_today_GMT
 from Historic_Crypto import Cryptocurrencies
 from midi_loader import instrument_paths, instrument_pitches, instruments
 from midiutil import MIDIFile
 from plotly.offline import plot
-from psidash.psidash import (assign_callbacks, get_callbacks, load_app,
-                             load_components, load_conf, load_dash)
-
-import glob
-import itertools
-import json
-import logging
-import math
-import os
-import sys
-import time
-from collections import defaultdict
-from datetime import datetime
-
-import audiogen_p3
-import dash
-import dash.dcc as dcc
-import dash.html as html
-import flask
-import numpy as np
-import pandas as pd
-import plotly.graph_objs as go
-from dash.dependencies import ClientsideFunction, Input, Output
-from dash.exceptions import PreventUpdate
-from dash_extensions import EventListener
-from dash_extensions.enrich import DashProxy, State
-from flask_dance.contrib.google import google, make_google_blueprint
-from history import get_granularity, get_history, get_today_GMT
-from Historic_Crypto import Cryptocurrencies
-from midi_loader import instrument_paths, instrument_pitches, instruments
-from midiutil import MIDIFile
-from plotly.offline import plot
-from psidash.psidash import (assign_callbacks, get_callbacks, load_app,
-                             load_components, load_conf, load_dash)
+from psidash.psidash import assign_callbacks, get_callbacks, load_app, load_components, load_conf, load_dash
 
 # Configuration and logger setup
 logging.basicConfig(filename='audiolizer.log')
@@ -360,26 +327,38 @@ google_bp = make_google_blueprint(
 
 app.server.register_blueprint(google_bp, url_prefix="/login")
 
+# Assuming `app.server` is your Flask server instance
+@app.server.route('/login/google/authorized')
+def google_authorized():
+    # This function should handle the OAuth callback logic
+    # Redirect to the root of your Dash app after login
+    return flask.redirect('/')
+
 
 @app.server.before_request
 def protect_dash_route():
-    # Example check for the Dash app's root
-    # You might need to adjust based on your app's routes and structure
-    print(f'request coming in at {flask.request.path}')
-    if flask.request.path == '/' or flask.request.path.startswith('/_dash-'):
+    if flask.request.path == '/login_page':
+        # Don't protect the login page
+        return
+    elif flask.request.path.startswith('/_dash-') or flask.request.path == '/':
         if not google.authorized:
-            print('redirecting to log in to google')
-            return flask.redirect(flask.url_for('google.login'))
-        else:
-            print('already authenticated')
+            return flask.redirect('/login_page')
 
+login_layout = load_components(conf['login'], conf.get('import'))
+main_layout = load_components(conf['layout'], conf.get('import'))
 
-
-app.layout = load_components(conf['layout'], conf.get('import'))
 
 if 'callbacks' in conf:
     callbacks = get_callbacks(app, conf['callbacks'])
     assign_callbacks(callbacks, conf['callbacks'])
+
+
+@callbacks.display_layout
+def display_layout(_):
+    if google.authorized:
+        return main_layout  # Your main app layout
+    else:
+        return login_layout
 
 def beeper(freq, amplitude=1, duration=.25):
     return (amplitude*_ for _ in audiogen_p3.beep(freq, duration))
