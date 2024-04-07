@@ -23,6 +23,7 @@ app:
 
     title: Market Audiolizer
     suppress_callback_exceptions: True
+    url_base_pathname: /
 
 
 A0: 1.4393326938302626 # low A (log10)

@@ -35,6 +35,7 @@ services:
       APP_SECRET: ${APP_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
     command: ["python", "audiolizer.py"] # runs on port 8051
     volumes:
       - type: bind

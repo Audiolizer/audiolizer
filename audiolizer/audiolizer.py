@@ -345,35 +345,34 @@ def clear_files(fname_glob="assets/*.wav", max_storage=10e6):
 
 conf = load_conf('../audiolizer.yaml')
 
-server = flask.Flask(__name__) # define flask app.server
+app = load_dash(__name__, conf['app'], conf.get('import'))
 
-# Replace client_id and client_secret with your own
+app.server.config.update(
+    SECRET_KEY=os.environ.get('APP_SECRET'),
+)
+
 google_bp = make_google_blueprint(
     client_id=os.environ['GOOGLE_CLIENT_ID'],
     client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
     scope=["openid"],
-    redirect_to="post_login",
+    redirect_to='/'
 )
-server.register_blueprint(google_bp, url_prefix="/login")
 
-conf['app']['server'] = server
-
-app = load_dash(__name__, conf['app'], conf.get('import'))
-
-app.secret_key = os.environ['APP_SECRET'] 
+app.server.register_blueprint(google_bp, url_prefix="/login")
 
 
-@server.route("/")
-def index():
-    if not google.authorized:
-        return redirect(url_for("google.login"))
-    resp = google.get("/oauth2/v1/userinfo")
-    assert resp.ok, resp.text
-    return "You are {email} on Google".format(email=resp.json()["email"])
+@app.server.before_request
+def protect_dash_route():
+    # Example check for the Dash app's root
+    # You might need to adjust based on your app's routes and structure
+    print(f'request coming in at {flask.request.path}')
+    if flask.request.path == '/' or flask.request.path.startswith('/_dash-'):
+        if not google.authorized:
+            print('redirecting to log in to google')
+            return flask.redirect(flask.url_for('google.login'))
+        else:
+            print('already authenticated')
 
-@server.route("/post_login")
-def post_login():
-    return "Successfully authenticated with Google!"
 
 
 app.layout = load_components(conf['layout'], conf.get('import'))
@@ -638,8 +637,7 @@ app.clientside_callback(
     Input('play', 'n_clicks'),
     State('instrument', 'value'),
     State('preset-path', 'children'),
-    State('midi-data', 'data'),
-    )
+    State('midi-data', 'data'))
 
 
 app.clientside_callback(
@@ -649,7 +647,6 @@ app.clientside_callback(
     State('instrument', 'value'),
     State('preset-path', 'children'),
     State('midi-data', 'data'))
-
 
 
 app.clientside_callback(
@@ -687,5 +684,4 @@ if __name__ == '__main__':
         dev_tools_hot_reload=False,
         extra_files=['../audiolizer.yaml', 'assets/midi.js']
         )
-# -
 
