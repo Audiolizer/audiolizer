@@ -333,16 +333,16 @@ layout:
   html.Div:
     children:
     - html.Div:
-        id:
+        id: page-content
+    - dcc.Location:
+        id: url
+        refresh: False
 
 
 main_layout:
   dbc.Container:
     fluid: True
     children:
-    - dcc.Location:
-        id: url
-        refresh: False
     - ${nav}
     - dbc.Row:
         justify: left
@@ -544,9 +544,6 @@ main_layout:
             props:
               - srcElement.value
         logging: True
-        # children:
-        # - html.Div:
-        #     id: dummy-div
     - dex.EventListener:
         id: when-listener
         events:
@@ -554,9 +551,6 @@ main_layout:
             props:
               - srcElement.value
         logging: True
-        # children:
-        # - html.Div:
-        #     id: dummy-div
     - html.Div:
         id: log
 
@@ -564,8 +558,8 @@ main_layout:
 callbacks:
   display_layout:
     input:
-      - id: dummy-div
-        attr: children
+      - id: url
+        attr: pathname
     output:
       - id: page-content
         attr: children

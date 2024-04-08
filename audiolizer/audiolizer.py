@@ -335,17 +335,12 @@ def google_authorized():
     return flask.redirect('/')
 
 
-@app.server.before_request
-def protect_dash_route():
-    if flask.request.path == '/login_page':
-        # Don't protect the login page
-        return
-    elif flask.request.path.startswith('/_dash-') or flask.request.path == '/':
-        if not google.authorized:
-            return flask.redirect('/login_page')
+initial_layout = load_components(conf['layout'], conf.get('import'))
+login_layout = load_components(conf['login_layout'], conf.get('import'))
+main_layout = load_components(conf['main_layout'], conf.get('import'))
 
-login_layout = load_components(conf['login'], conf.get('import'))
-main_layout = load_components(conf['layout'], conf.get('import'))
+
+app.layout = initial_layout
 
 
 if 'callbacks' in conf:
@@ -354,9 +349,9 @@ if 'callbacks' in conf:
 
 
 @callbacks.display_layout
-def display_layout(_):
+def display_layout(url):
     if google.authorized:
-        return main_layout  # Your main app layout
+        return main_layout
     else:
         return login_layout
 
