@@ -349,7 +349,7 @@ if 'callbacks' in conf:
 
 
 @callbacks.display_layout
-def display_layout(url):
+def display_layout(pathname):
     if google.authorized:
         return main_layout
     else:

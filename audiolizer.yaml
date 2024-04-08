@@ -10,10 +10,11 @@ import:
 app:
   dash.Dash:
     external_stylesheets:
-      - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
+      # - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
-      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css"
+      - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css
+      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cyborg/bootstrap.min.css
 
     external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
@@ -43,16 +44,93 @@ run_server:
   dev_tools_hot_reload: False
 
 
-
 login_layout:
-  html.Div:
+  dbc.Container:
+    fluid: true
     children:
-    - html.H2: Login Required
-    - html.A:
-        children: Login with Google
-        href: /login/google
-        className: login-button
+      - html.Br:
+      - html.Br:
+      - dbc.Row:
+          justify: center
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                  - html.H2:
+                      children: Login Required
+                      className: text-center mb-4
+                  - dbc.InputGroup:
+                      size: lg
+                      children:
+                        - dbc.InputGroupAddon:
+                            addon_type: prepend
+                            children: 
+                              - dbc.InputGroupText:
+                                  children: Username
+                        - dbc.Input:
+                            type: text
+                            placeholder: Enter username
+                  - dbc.InputGroup:
+                      size: lg
+                      className: mt-3
+                      children:
+                        - dbc.InputGroupAddon:
+                            addon_type: prepend
+                            children: 
+                              - dbc.InputGroupText:
+                                  children: Password
+                        - dbc.Input:
+                            type: password
+                            placeholder: Enter password
+                  - dbc.Button:
+                      children: Manual Login
+                      color: secondary
+                      className: mt-3
+                      size: lg
+                      block: true
 
+      - dbc.Row:
+          justify: center
+          children:
+            - dbc.Col:
+                md: 6
+                align: center
+                children:
+                  - html.Div:
+                      className: vl
+                  - html.Span:
+                      children: or
+                      className: vl-innertext
+      - dbc.Row:
+          justify: center
+          no_gutters: true
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                  - dbc.Button:
+                      id: google-login-btn
+                      children: Login with Google
+                      href: /login/google
+                      color: primary
+                      className: mt-2 mb-2
+                      size: lg
+                      block: true
+      - dbc.Row:
+          justify: center
+          className: mt-3
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                  - dbc.Button:
+                      children: Sign up
+                      href: "#"
+                      color: link
+                  - dbc.Button:
+                      children: Forgot password?
+                      href: "#"
+                      color: link
 
 nav:
   dbc.Navbar:
