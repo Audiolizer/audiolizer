@@ -154,7 +154,7 @@ nav:
                       children:
                       - dbc.NavbarBrand:
                           children:
-                            html.H6: How It Works
+                            html.H3: How It Works
                           # className: ml-3
           href: https://audiolizer.github.io/audiolizer/
     dark: True
@@ -286,15 +286,15 @@ date_settings:
                 bs_size: lg
 
 instrument_settings:
-  - dcc.Dropdown:
+  - dbc.Select:
       id: category
-      clearable: False
-  - dcc.Dropdown:
+      required: True
+  - dbc.Select:
       id: instrument-type
-      clearable: False
-  - dcc.Dropdown:
+      required: True
+  - dbc.Select:
       id: instrument
-      clearable: False
+      required: True
   - html.Div:
       id: out-component
       children: 'True'
@@ -308,9 +308,9 @@ scale_settings:
           width:
             size: 10
           children:
-          - dcc.Dropdown:
+          - dbc.Select:
               id: scale
-              clearable: False
+              required: True
               options:
                 - label: D Dorian
                   value: 'D,E,F,G,A,B,C'
@@ -324,6 +324,10 @@ scale_settings:
                   value: 'A,C,D,D#,E,G'
                 - label: Chromatic
                   value: 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B'
+                - label: E Mixolydian
+                  value: 'E,F#,G#,A,B,C#,D'
+                - label: C Whole Tone
+                  value: 'C,D,E,F#,G#,A#'
               value: 'C,D,E,F,G,A,B'
   - dbc.Row:
       children:
@@ -430,34 +434,34 @@ main_layout:
     - dbc.Row:
         no_gutters: True
         children:
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${date_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${instrument_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${scale_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${duration_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${date_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${instrument_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${scale_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${duration_settings}
     - dbc.Row:
         id: debug
     - dbc.Row:
@@ -564,6 +568,7 @@ main_layout:
                   value: ''
                   style:
                     display: none
+    - html.Br:
     - dbc.Row:
         children:
           - dbc.Col:
