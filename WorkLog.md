@@ -1,3 +1,4 @@
+* finishing dark theme
 
 # 2024-04-17 19:45:52.642806: clock-in
 

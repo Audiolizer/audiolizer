@@ -5,3 +5,8 @@
 .custom-checkbox {
     font-size: 1.5rem; /* Specific adjustment for dbc.Select component */
 }
+
+.DateRangePickerInput{
+  border: 0px;
+  background-color: transparent;
+}
