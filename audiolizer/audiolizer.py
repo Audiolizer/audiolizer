@@ -328,6 +328,12 @@ google_bp = make_google_blueprint(
 
 app.server.register_blueprint(google_bp, url_prefix="/login")
 
+
+@app.server.route('/login/google')
+def google_login():
+    print("Attempting to redirect to Google login.")
+    return flask.redirect(flask.url_for('google.login'))
+
 # Assuming `app.server` is your Flask server instance
 @app.server.route('/login/google/authorized')
 def google_authorized():

@@ -101,27 +101,31 @@ function play_sequence(preset, notes, startFrom = 0) {
 
 function stop_sequence(){
     // Cancel all scheduled envelopes for sound playback
-    if (typeof window['envelope'] !== 'undefined') {
-        // console.log('stopping envelopes');
+    if (typeof window['envelope'] !== 'undefined' && Array.isArray(window['envelope'])) {
         window['envelope'].forEach(function(envelope) {
-            envelope.cancel(); 
+            // Check if envelope is an object and has a cancel method before calling it
+            if (envelope && typeof envelope.cancel === 'function') {
+                envelope.cancel();
+            } else {
+                console.log('Attempted to cancel an invalid envelope');
+            }
         });
         window['envelope'] = []; // Clear the envelopes array after stopping
     } else {
-        // console.log('no envelopes to cancel');
+        console.log('No envelopes to cancel or envelope array is undefined');
     }
 
     // Clear all scheduled setTimeout calls to prevent logging
-    if (typeof window['timeoutIDs'] !== 'undefined' && window['timeoutIDs'].length > 0) {
-        // console.log('stopping scheduled logs');
+    if (typeof window['timeoutIDs'] !== 'undefined' && Array.isArray(window['timeoutIDs'])) {
         window['timeoutIDs'].forEach(function(timeoutID) {
             clearTimeout(timeoutID);
         });
         window['timeoutIDs'] = []; // Clear the timeoutIDs array after clearing timeouts
     } else {
-        // console.log('no scheduled logs to cancel');
+        console.log('No scheduled logs to cancel or timeoutIDs array is undefined');
     }
 }
+
 
 
 function loadAndPlaySequence(preset, path, notes, startFrom) {

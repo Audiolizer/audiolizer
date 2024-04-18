@@ -62,48 +62,36 @@ login_layout:
                   - html.H2:
                       children: Login Required
                       className: text-center mb-4
-                  - dbc.InputGroup:
-                      size: lg
-                      children:
-                        - dbc.InputGroupAddon:
-                            addon_type: prepend
-                            children: 
-                              - dbc.InputGroupText:
-                                  children: Username
-                        - dbc.Input:
-                            type: text
-                            placeholder: Enter username
-                  - dbc.InputGroup:
-                      size: lg
-                      className: mt-3
-                      children:
-                        - dbc.InputGroupAddon:
-                            addon_type: prepend
-                            children: 
-                              - dbc.InputGroupText:
-                                  children: Password
-                        - dbc.Input:
-                            type: password
-                            placeholder: Enter password
+                  # - dbc.InputGroup:
+                  #     size: lg
+                  #     children:
+                  #       - dbc.InputGroupAddon:
+                  #           addon_type: prepend
+                  #           children: 
+                  #             - dbc.InputGroupText:
+                  #                 children: Username
+                  #       - dbc.Input:
+                  #           type: text
+                  #           placeholder: Enter username
+                  # - dbc.InputGroup:
+                  #     size: lg
+                  #     className: mt-3
+                  #     children:
+                  #       - dbc.InputGroupAddon:
+                  #           addon_type: prepend
+                  #           children: 
+                  #             - dbc.InputGroupText:
+                  #                 children: Password
+                  #       - dbc.Input:
+                  #           type: password
+                  #           placeholder: Enter password
                   - dbc.Button:
                       children: Manual Login
                       color: secondary
                       className: mt-3
                       size: lg
                       block: true
-
-      - dbc.Row:
-          justify: center
-          children:
-            - dbc.Col:
-                md: 6
-                align: center
-                children:
-                  - html.Div:
-                      className: vl
-                  - html.Span:
-                      children: or
-                      className: vl-innertext
+      - html.Br:
       - dbc.Row:
           justify: center
           no_gutters: true
@@ -111,14 +99,18 @@ login_layout:
             - dbc.Col:
                 md: 6
                 children:
-                  - dbc.Button:
-                      id: google-login-btn
-                      children: Login with Google
-                      href: /login/google
-                      color: primary
-                      className: mt-2 mb-2
-                      size: lg
-                      block: true
+                - dbc.Button:
+                    id: google-login-btn
+                    children: Login with Google
+                    external_link: True
+                    href: /login/google
+                    color: primary
+                    className: mt-2 mb-2
+                    size: lg
+                    block: true
+      - html.Div:
+          id: authorized-hidden
+
       - dbc.Row:
           justify: center
           className: mt-3
@@ -157,7 +149,7 @@ nav:
                       children:
                       - dbc.NavbarBrand:
                           children:
-                            html.H2: Audible Markets
+                            html.H2: Market Audiolizer
                           # className: ml-3
           # href: https://audiolizer.github.io/audiolizer/
     dark: True
