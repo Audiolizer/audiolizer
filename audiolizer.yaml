@@ -213,32 +213,33 @@ date_settings:
             align: center
             width: auto
             children:
-              - dbc.Select:
-                  id: base
-                  options:
-                    - label: BTC
-                      value: BTC
-                  value: BTC
-                  required: True
-                  bs_size: lg
-                  style: ${dark_style}
-        - dbc.Col:
-            align: center
-            width: auto
-            children: /
+            - dbc.Select:
+                id: base
+                options:
+                  - label: BTC
+                    value: BTC
+                value: BTC
+                required: True
+                bs_size: lg
+                style: ${dark_style}
         - dbc.Col:
             align: center
             width: auto
             children:
-              - dbc.Select:
-                  id: quote
-                  options:
-                    - label: USD
-                      value: USD
+              html.H2: /
+        - dbc.Col:
+            align: center
+            width: auto
+            children:
+            - dbc.Select:
+                id: quote
+                options:
+                - label: USD
                   value: USD
-                  required: True
-                  bs_size: lg
-                  style: ${dark_style}
+                value: USD
+                required: True
+                bs_size: lg
+                style: ${dark_style}
   - dbc.Row:
       children:
         - dbc.Col:
@@ -589,7 +590,11 @@ main_layout:
                 value: ''
                 size: lg
                 style:
-                  height: 100%  # This will make the input fill the height of the column
+                  # backgroundColor: '#333'
+                  backgroundColor: transparent
+                  color: '#fff'
+                  border: '1px solid transparent'
+                  height: 100%
         - dbc.Col:
             width:
               xs: 12
