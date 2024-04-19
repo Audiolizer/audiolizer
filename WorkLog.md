@@ -1,3 +1,4 @@
+* linking to screenshot
 * adding screenshot
 * control logins with ENABLE_USER_LOGINS
 
