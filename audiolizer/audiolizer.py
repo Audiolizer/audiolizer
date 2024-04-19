@@ -48,6 +48,7 @@ granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300))  # seconds
 wav_threshold = int(os.environ.get('AUDIOLIZER_WAV_CACHE_SIZE', 100))  # megabytes
 midi_threshold = int(os.environ.get('AUDIOLIZER_MIDI_CACHE_SIZE', 10))
 price_threshold = int(os.environ.get('AUDIOLIZER_PRICE_CACHE_SIZE', 100))
+enable_user_logins = os.environ.get('ENABLE_USER_LOGINS', '').lower() == 'true'
 
 logger.info('cache sizes: \n wav:{}Mb\n midi:{}Mb\n price:{}Mb'.format(wav_threshold, midi_threshold, price_threshold))
 
@@ -319,27 +320,28 @@ app.server.config.update(
     SECRET_KEY=os.environ.get('APP_SECRET'),
 )
 
-google_bp = make_google_blueprint(
-    client_id=os.environ['GOOGLE_CLIENT_ID'],
-    client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
-    scope=["openid"],
-    redirect_to='/'
-)
+if enable_user_logins:
+    print('enabling user logins')
+    google_bp = make_google_blueprint(
+        client_id=os.environ['GOOGLE_CLIENT_ID'],
+        client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+        scope=["openid"],
+        redirect_to='/'
+    )
 
-app.server.register_blueprint(google_bp, url_prefix="/login")
+    app.server.register_blueprint(google_bp, url_prefix="/login")
 
+    @app.server.route('/login/google')
+    def google_login():
+        print("Attempting to redirect to Google login.")
+        return flask.redirect(flask.url_for('google.login'))
 
-@app.server.route('/login/google')
-def google_login():
-    print("Attempting to redirect to Google login.")
-    return flask.redirect(flask.url_for('google.login'))
-
-# Assuming `app.server` is your Flask server instance
-@app.server.route('/login/google/authorized')
-def google_authorized():
-    # This function should handle the OAuth callback logic
-    # Redirect to the root of your Dash app after login
-    return flask.redirect('/')
+    # Assuming `app.server` is your Flask server instance
+    @app.server.route('/login/google/authorized')
+    def google_authorized():
+        # This function should handle the OAuth callback logic
+        # Redirect to the root of your Dash app after login
+        return flask.redirect('/')
 
 
 initial_layout = load_components(conf['layout'], conf.get('import'))
@@ -357,10 +359,13 @@ if 'callbacks' in conf:
 
 @callbacks.display_layout
 def display_layout(pathname):
-    if google.authorized:
-        return main_layout
+    if enable_user_logins:
+        if google.authorized:
+            return main_layout
+        else:
+            return login_layout
     else:
-        return login_layout
+        return main_layout
 
 def beeper(freq, amplitude=1, duration=.25):
     return (amplitude*_ for _ in audiogen_p3.beep(freq, duration))

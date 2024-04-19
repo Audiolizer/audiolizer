@@ -17,6 +17,7 @@ services:
       APP_SECRET: ${APP_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
     command: ["gunicorn", "--workers=1", "--bind", "0.0.0.0:8080", "audiolizer:server"]
     # volumes:
     #   - type: bind
@@ -36,6 +37,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
+      ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
     command: ["python", "audiolizer.py"] # runs on port 8051
     volumes:
       - type: bind
@@ -55,6 +57,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
+      ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
     command: ["python", "test_login.py"] # runs on port 8051
     volumes:
       - type: bind
@@ -71,6 +74,7 @@ services:
       AUDIOLIZER_TEMP: /home/audiolizer/audiolizer/history
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
       APP_SECRET: ${APP_SECRET}
     command: ["jupyter", "notebook", ".", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
     volumes:

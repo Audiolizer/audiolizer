@@ -1,3 +1,4 @@
+* control logins with ENABLE_USER_LOGINS
 
 # 2024-04-18 22:56:18.062189: clock-in
 
