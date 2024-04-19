@@ -10,10 +10,14 @@ import:
 app:
   dash.Dash:
     external_stylesheets:
-      - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
+      # - https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css
       - https://codepen.io/chriddyp/pen/bWLwgP.css
       # - https://cdn.clarkhacks.com/OpenDyslexic/v3/OpenDyslexic.css
-      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css"
+      - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css
+      # - https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cyborg/bootstrap.min.css
+      # the below theme is supposed to style dcc.Datepicker with dark theme, but seems broken
+      # - https://raw.githubusercontent.com/tcbegley/dash-bootstrap-css/main/dist/darkly/bootstrap.min.css
+      - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css
 
     external_scripts:
       - https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js
@@ -21,8 +25,9 @@ app:
       - https://surikov.github.io/webaudiofontdata/sound/0240_Chaos_sf2_file.js
       - https://cdn.plot.ly/plotly-2.30.0.min.js
 
-    title: Market Audiolizer
+    title: Audible Markets
     suppress_callback_exceptions: True
+    url_base_pathname: /
 
 
 A0: 1.4393326938302626 # low A (log10)
@@ -41,6 +46,86 @@ run_server:
   debug: True
   dev_tools_hot_reload: False
 
+
+login_layout:
+  dbc.Container:
+    fluid: true
+    children:
+      - html.Br:
+      - html.Br:
+      - dbc.Row:
+          justify: center
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                  - html.H2:
+                      children: Login Required
+                      className: text-center mb-4
+                  # - dbc.InputGroup:
+                  #     size: lg
+                  #     children:
+                  #       - dbc.InputGroupAddon:
+                  #           addon_type: prepend
+                  #           children: 
+                  #             - dbc.InputGroupText:
+                  #                 children: Username
+                  #       - dbc.Input:
+                  #           type: text
+                  #           placeholder: Enter username
+                  # - dbc.InputGroup:
+                  #     size: lg
+                  #     className: mt-3
+                  #     children:
+                  #       - dbc.InputGroupAddon:
+                  #           addon_type: prepend
+                  #           children: 
+                  #             - dbc.InputGroupText:
+                  #                 children: Password
+                  #       - dbc.Input:
+                  #           type: password
+                  #           placeholder: Enter password
+                  - dbc.Button:
+                      children: Manual Login
+                      color: secondary
+                      className: mt-3
+                      size: lg
+                      block: true
+      - html.Br:
+      - dbc.Row:
+          justify: center
+          no_gutters: true
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                - dbc.Button:
+                    id: google-login-btn
+                    children: Login with Google
+                    external_link: True
+                    href: /login/google
+                    color: primary
+                    className: mt-2 mb-2
+                    size: lg
+                    block: true
+      - html.Div:
+          id: authorized-hidden
+
+      - dbc.Row:
+          justify: center
+          className: mt-3
+          children:
+            - dbc.Col:
+                md: 6
+                children:
+                  - dbc.Button:
+                      children: Sign up
+                      href: "#"
+                      color: link
+                  - dbc.Button:
+                      children: Forgot password?
+                      href: "#"
+                      color: link
 
 nav:
   dbc.Navbar:
@@ -64,23 +149,22 @@ nav:
                       children:
                       - dbc.NavbarBrand:
                           children:
-                            html.H6: How It Works
+                            html.H2: Market Audiolizer
                           # className: ml-3
-          href: https://audiolizer.github.io/audiolizer/
+          # href: https://audiolizer.github.io/audiolizer/
     dark: True
 
 player_settings:
-  - dbc.Col:
-      width: 5
-      children: 
-        - html.H2: Market Audiolizer
-        - dcc.Loading:
-            id: loading
-            type: default
-            children:
-              - html.Div:
-                  id: loading-output
-                  children: loading output
+  # - dbc.Col:
+  #     width: 5
+  #     children: 
+  #       - dcc.Loading:
+  #           id: loading
+  #           type: default
+  #           children:
+  #             - html.Div:
+  #                 id: loading-output
+  #                 children: loading output
   # - dbc.Col:
   #     width:
   #       xs: 12
@@ -105,6 +189,13 @@ player_settings:
   #                   href: ''
   #                   download: ''
 
+
+
+dark_style:
+  backgroundColor: '#333'
+  color: '#fff'
+  border: '1px solid #444'
+
 date_settings:
   - dbc.Row:
       align: center
@@ -114,30 +205,33 @@ date_settings:
             align: center
             width: auto
             children:
-              - dbc.Select:
-                  id: base
-                  options:
-                    - label: BTC
-                      value: BTC
-                  value: BTC
-                  required: True
-                  bs_size: lg
-        - dbc.Col:
-            align: center
-            width: auto
-            children: /
+            - dbc.Select:
+                id: base
+                options:
+                  - label: BTC
+                    value: BTC
+                value: BTC
+                required: True
+                bs_size: lg
+                style: ${dark_style}
         - dbc.Col:
             align: center
             width: auto
             children:
-              - dbc.Select:
-                  id: quote
-                  options:
-                    - label: USD
-                      value: USD
+              html.H2: /
+        - dbc.Col:
+            align: center
+            width: auto
+            children:
+            - dbc.Select:
+                id: quote
+                options:
+                - label: USD
                   value: USD
-                  required: True
-                  bs_size: lg
+                value: USD
+                required: True
+                bs_size: lg
+                style: ${dark_style}
   - dbc.Row:
       children:
         - dbc.Col:
@@ -160,18 +254,27 @@ date_settings:
                     value: '365D-7D'
                 value: '24H-15T'
                 inline: True
+                style:
+                  fontSize: '15px'
+                  padding': '10px'
   - dbc.Row:
       children:
         dbc.Col:
           width: auto
           children:
-          - dcc.DatePickerRange:
-              id: date-range
-              min_date_allowed: 2001-01-01
-              max_date_allowed:
-              initial_visible_month: 2021-01-01
-              start_date: 2021-01-01
-              end_date:
+          - html.Div:
+              style:
+                backgroundColor: '#333'
+              children:
+              - dcc.DatePickerRange:
+                  id: date-range
+                  min_date_allowed: 2001-01-01
+                  max_date_allowed:
+                  initial_visible_month: 2021-01-01
+                  start_date: 2021-01-01
+                  end_date:
+                  style: ${dark_style}
+
   - dbc.Row:
       children:
         - dbc.Col:
@@ -194,17 +297,21 @@ date_settings:
                 required: True
                 value: 7D
                 bs_size: lg
+                style: ${dark_style}
 
 instrument_settings:
-  - dcc.Dropdown:
+  - dbc.Select:
       id: category
-      clearable: False
-  - dcc.Dropdown:
+      required: True
+      style: ${dark_style}
+  - dbc.Select:
       id: instrument-type
-      clearable: False
-  - dcc.Dropdown:
+      required: True
+      style: ${dark_style}
+  - dbc.Select:
       id: instrument
-      clearable: False
+      required: True
+      style: ${dark_style}
   - html.Div:
       id: out-component
       children: 'True'
@@ -218,9 +325,9 @@ scale_settings:
           width:
             size: 10
           children:
-          - dcc.Dropdown:
+          - dbc.Select:
               id: scale
-              clearable: False
+              required: True
               options:
                 - label: D Dorian
                   value: 'D,E,F,G,A,B,C'
@@ -234,7 +341,12 @@ scale_settings:
                   value: 'A,C,D,D#,E,G'
                 - label: Chromatic
                   value: 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B'
+                - label: E Mixolydian
+                  value: 'E,F#,G#,A,B,C#,D'
+                - label: C Whole Tone
+                  value: 'C,D,E,F#,G#,A#'
               value: 'C,D,E,F,G,A,B'
+              style: ${dark_style}
   - dbc.Row:
       children:
         dbc.Col:
@@ -316,13 +428,21 @@ storage:
   dcc.Store:
     id: midi-data
 
+
 layout:
-  dbc.Container:
-    fluid: True
+  html.Div:
     children:
+    - html.Div:
+        id: page-content
     - dcc.Location:
         id: url
         refresh: False
+
+
+main_layout:
+  dbc.Container:
+    fluid: True
+    children:
     - ${nav}
     - dbc.Row:
         justify: left
@@ -332,37 +452,39 @@ layout:
     - dbc.Row:
         no_gutters: True
         children:
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${date_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${instrument_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${scale_settings}
-          - dbc.Col:
-              xs: 12
-              sm: 12
-              md: 6
-              lg: 6
-              xl: 3
-              children: ${duration_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${date_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${instrument_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${scale_settings}
+        - dbc.Col:
+            xs: 12
+            sm: 12
+            md: 6
+            lg: 6
+            xl: 3
+            children: ${duration_settings}
     - dbc.Row:
         id: debug
+    - html.Br:
     - dbc.Row:
+        justify: center
         children:
         - dbc.Col:
             width:
@@ -372,15 +494,17 @@ layout:
               lg: 3
               xl: 3
             children:
-              - html.Br:
-              - html.Button:
-                  id: play
-                  n_clicks: 0
-                  children: Play
-              - html.Div:
-                  id: play-time
-                  style:
-                    # display: none
+            - dcc.Loading:
+                id: loading
+                type: default
+                children:
+                  - html.Div:
+                      id: loading-output
+                      children: loading output
+    - dbc.Row:
+        no_gutters: False
+        justify: center
+        children:
         - dbc.Col:
             width:
               xs: 12
@@ -389,15 +513,19 @@ layout:
               lg: 3
               xl: 3
             children:
-              - html.Br:
-              - html.Button:
-                  id: pause
-                  n_clicks: 0
-                  children: Pause
-              - html.Div:
-                  id: pause-clicks
-                  style:
-                    display: none
+            - dbc.Button:
+                id: play
+                n_clicks: 0
+                children:
+                  - html.I:
+                      className: "fas fa-play"
+                color: info
+                style:
+                  padding: '10px 40px'  # Adjust padding to make the button wider
+            - html.Div:
+                id: play-time
+                style:
+                  # display: none
         - dbc.Col:
             width:
               xs: 12
@@ -406,15 +534,19 @@ layout:
               lg: 3
               xl: 3
             children:
-              - html.Br:
-              - html.Button:
-                  id: stop
-                  n_clicks: 0
-                  children: stop
-              - html.Div:
-                  id: stop-clicks
-                  style:
-                    display: none
+            - dbc.Button:
+                id: pause
+                n_clicks: 0
+                children:
+                  - html.I:
+                      className: "fas fa-pause"
+                color: primary
+                style:
+                  padding: '10px 40px'  # Adjust padding to make the button wider
+            - html.Div:
+                id: pause-clicks
+                style:
+                  display: none
         - dbc.Col:
             width:
               xs: 12
@@ -423,10 +555,38 @@ layout:
               lg: 3
               xl: 3
             children:
-              - html.Br:
-              - dcc.Input:
-                  id: timestamp-input
-                  value: ''
+            - dbc.Button:
+                id: stop
+                n_clicks: 0
+                children: stop
+                color: secondary
+                children:
+                  - html.I:
+                      className: "fas fa-stop"
+                style:
+                  padding: '10px 40px'  # Adjust padding to make the button wider
+            - html.Div:
+                id: stop-clicks
+                style:
+                  display: none
+        - dbc.Col:
+            width:
+              xs: 12
+              sm: 12
+              md: 12
+              lg: 3
+              xl: 3
+            children:
+            - dbc.Input:
+                id: timestamp-input
+                value: ''
+                size: lg
+                style:
+                  # backgroundColor: '#333'
+                  backgroundColor: transparent
+                  color: '#fff'
+                  border: '1px solid transparent'
+                  height: 100%
         - dbc.Col:
             width:
               xs: 12
@@ -466,6 +626,7 @@ layout:
                   value: ''
                   style:
                     display: none
+    - html.Br:
     - dbc.Row:
         children:
           - dbc.Col:
@@ -473,6 +634,28 @@ layout:
               - dcc.Graph:
                   id: candlestick-chart
                   animate: False
+                  figure:
+                    data: [ ]
+                    layout:
+                      xaxis:
+                        showticklabels: False
+                        ticks: ''
+                        showgrid: False
+                        zeroline: False
+                      yaxis:
+                        showticklabels: False
+                        ticks: ''
+                        showgrid: False
+                        zeroline: False
+                      paper_bgcolor: '#1e1e1e'  # Dark background for the outer area of the chart
+                      plot_bgcolor: '#1e1e1e'  # Dark background for the plotting area itself
+                      font:
+                        color: '#d4d4d4'  # Light grey text for readability on dark background
+                      title:  # Optional, add a title if needed
+                        text: ''
+                        font:
+                          size: 20
+                          color: '#ffffff'  # White color for the title text
                   config:
                     staticPlot: False
                     displaylogo: False
@@ -524,9 +707,6 @@ layout:
             props:
               - srcElement.value
         logging: True
-        # children:
-        # - html.Div:
-        #     id: dummy-div
     - dex.EventListener:
         id: when-listener
         events:
@@ -534,14 +714,19 @@ layout:
             props:
               - srcElement.value
         logging: True
-        # children:
-        # - html.Div:
-        #     id: dummy-div
     - html.Div:
         id: log
 
 
 callbacks:
+  display_layout:
+    input:
+      - id: url
+        attr: pathname
+    output:
+      - id: page-content
+        attr: children
+
   update_base_options:
     input:
       - id: url

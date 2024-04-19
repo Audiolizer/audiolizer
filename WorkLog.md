@@ -1,3 +1,66 @@
+# 2024-04-18 23:21:24.965856: clock-out
+
+* linking to screenshot
+* adding screenshot
+* control logins with ENABLE_USER_LOGINS
+
+# 2024-04-18 22:56:18.062189: clock-in
+
+# 2024-04-18 17:18:21.519510: clock-out
+
+* fixed google login button
+* fixed background colors
+
+# 2024-04-18 15:50:54.263654: clock-in
+
+# 2024-04-17 22:09:39.427236: clock-out: T-10m 
+
+* finishing dark theme
+
+# 2024-04-17 19:45:52.642806: clock-in
+
+# 2024-04-14 15:49:08.766620: clock-out
+
+* styling
+
+# 2024-04-14 15:14:56.456878: clock-in
+
+# 2024-04-08 10:20:50.427506: clock-out
+
+* restyling login, theme
+
+# 2024-04-08 09:29:02.023562: clock-in
+
+# 2024-04-07 19:39:47.630309: clock-out
+
+* login layout dynamically
+
+# 2024-04-07 18:55:20.612962: clock-in
+
+# 2024-04-07 10:10:12.003298: clock-out
+
+* login page
+
+# 2024-04-07 09:11:06.681450: clock-in
+
+# 2024-04-06 21:18:55.351661: clock-out
+
+* working google login
+
+# 2024-04-06 20:03:17.370984: clock-in
+
+# 2024-04-06 17:01:30.182495: clock-out: T-10m 
+
+* test logins
+
+# 2024-04-06 13:12:45.511256: clock-in
+
+# 2024-04-03 20:31:13.106666: clock-out
+
+* adding mongodb, oauth requirements
+
+# 2024-04-03 19:31:28.321408: clock-in
+
 * add dorian scale
 
 # 2024-04-01 17:55:50.474543: clock-out

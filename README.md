@@ -3,8 +3,7 @@
 #### Market audiolization dashboard
 
 
-
-![Market audiolizer screenshot](https://github.com/asherp/audiolizer/raw/master/audiolizer0.2_screen_shot.png)
+![Screenshot](https://github.com/Audiolizer/audiolizer/blob/feat/logins/docs/screen_shot.png)
 
 Here is the [midi file](https://github.com/asherp/audiolizer/raw/master/docs/assets/BTC_2020-09-01_2021-06-21_1W_C3_C5_pitch_25_75_240bpm_merged_rests.midi) for the above plot.
 
