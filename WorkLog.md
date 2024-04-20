@@ -1,3 +1,4 @@
+* tonic and mode selection
 
 # 2024-04-19 16:47:46.663170: clock-in
 

@@ -318,6 +318,27 @@ instrument_settings:
       style:
         display: none
 
+# mode labels can have spaces but no special characters
+scale_modes:
+  - label: Dorian
+    value: '2,1,2,2,2,1,2'
+  - label: Major Ionian
+    value: '2,2,1,2,2,2,1'
+  - label: Phrygian Dominant
+    value: '1,3,1,2,1,2,2'
+  - label: Harmonic Minor
+    value: '2,1,2,2,1,3,1'
+  - label: Minor Blues
+    value: '3,2,1,1,3,3'
+  - label: Major Blues
+    value: '2,1,1,2,2,2'
+  - label: Chromatic
+    value: '1,1,1,1,1,1,1,1,1,1,1,1'
+  - label: Mixolydian
+    value: '2,2,1,2,2,1,2'
+  - label: Whole Tone
+    value: '2,2,2,2,2,2'
+
 scale_settings:
   - dbc.Row:
       children:
@@ -326,26 +347,40 @@ scale_settings:
             size: 10
           children:
           - dbc.Select:
-              id: scale
+              id: tonic
               required: True
               options:
-                - label: D Dorian
-                  value: 'D,E,F,G,A,B,C'
-                - label: C Major
-                  value: 'C,D,E,F,G,A,B'
-                - label: E Phrygian Dominant
-                  value: 'E,F,G#,A,B,C,D'
-                - label: A Harmonic Minor
-                  value: 'A,B,C,D,E,F,G#'
-                - label: A Blues
-                  value: 'A,C,D,D#,E,G'
-                - label: Chromatic
-                  value: 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B'
-                - label: E Mixolydian
-                  value: 'E,F#,G#,A,B,C#,D'
-                - label: C Whole Tone
-                  value: 'C,D,E,F#,G#,A#'
-              value: 'C,D,E,F,G,A,B'
+                - label: C
+                  value: C
+                - label: C#
+                  value: C#
+                - label: D
+                  value: D
+                - label: D#
+                  value: D#
+                - label: E
+                  value: E
+                - label: F
+                  value: F
+                - label: F#
+                  value: F#
+                - label: G
+                  value: G
+                - label: G#
+                  value: G#
+                - label: A
+                  value: A
+                - label: A#
+                  value: A#
+                - label: B
+                  value: B
+              value: C
+              style: ${dark_style}
+          - dbc.Select:
+              id: mode
+              required: True
+              options: ${scale_modes}
+              value: '2,1,2,2,2,1,2'
               style: ${dark_style}
   - dbc.Row:
       children:
@@ -774,7 +809,9 @@ callbacks:
         attr: end_date
       - id: cadence
         attr: value
-      - id: scale
+      - id: tonic
+        attr: value
+      - id: mode
         attr: value
       - id: frequency-drag
         attr: value

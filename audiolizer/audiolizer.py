@@ -367,6 +367,8 @@ def display_layout(pathname):
     else:
         return main_layout
 
+scale_modes = conf['scale_modes']
+
 def beeper(freq, amplitude=1, duration=.25):
     return (amplitude*_ for _ in audiogen_p3.beep(freq, duration))
 
@@ -421,12 +423,50 @@ def get_sequence(beeps):
         t += dur
     return sequence
 
+def get_scale_notes(tonic, semitone_sequence):
+    """construct note sequence from tonic and semitones
+
+    ex: C major scale
+        get_scale_notes('C', '2,2,1,2,2,2,1')
+
+        returns: C, D, E, F, G, A, B
+
+    """
+    # Mapping of note to its corresponding semitone number in an octave
+    notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+    # Find starting index from the notes list
+    start_index = notes.index(tonic)
+
+    # Split the semitone_sequence input to identify the steps
+    steps = semitone_sequence.split(',')
+
+    # Start with the tonic note
+    scale = [tonic]
+
+    # Current index in the chromatic scale
+    current_index = start_index
+
+    for step in steps:
+        # Calculate the number of semitones to move
+        semitone_steps = int(step)
+
+        # Update current index and wrap around using modulo 12
+        current_index = (current_index + semitone_steps) % 12
+
+        # Append the note at the new index
+        scale.append(notes[current_index])
+
+    # Return the scale except the last note to maintain the structure of one octave
+    return ','.join(scale[:-1])
+
 
 @callbacks.play
 def play(base, quote,
          start, end,
          cadence,
-         scale,
+         tonic,
+         semitone_sequence,
          log_freq_range,
          # drop_quantile, beat_quantile,
          tempo,
@@ -496,13 +536,18 @@ def play(base, quote,
     # else:
     #     silences = ''
 
+    scale_notes = get_scale_notes(tonic, semitone_sequence)
+
+    mode_label = next((item['label'] for item in scale_modes if item['value'] == semitone_sequence), 'unknown')
+
     fname = '{}_{}_{}_{}_{}_{}_{}_{}_{}.wav'.format(
         ticker,
         '-'.join(price_type),
         start_.date(),
         end_.date(),
         cadence,
-        *['{}'.format(pitch_from_freq(10**_, scale).replace('#', 'sharp')) for _ in log_freq_range],
+        tonic.replace('#', 'sharp'),
+        mode_label.replace(' ', ''),
         # drop_quantile,
         # beat_quantile,
         '{}bpm'.format(tempo),
@@ -544,12 +589,12 @@ def play(base, quote,
         for t, (price, volume_) in new_[[price_type_, 'volume']].iterrows():
             if ~np.isnan(price):
                 freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale))
+                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
                 beep = t, midi_note(freq_), volume_/max_vol, duration
                 beeps.append(beep)
             else:
                 freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale))
+                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
                 beep = t, midi_note(freq_), 0, duration
                 beeps.append(beep)
                 logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
