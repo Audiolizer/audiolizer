@@ -1,3 +1,6 @@
+
+# 2024-04-20 21:02:17.845980: clock-in
+
 # 2024-04-19 19:00:55.996430: clock-out
 
 * tonic and mode selection
