@@ -22,8 +22,7 @@ COPY . /home/audiolizer
 
 WORKDIR /home/audiolizer/audiolizer
 
-RUN jupyter nbextension enable --py jupytext
-RUN jupyter nbextension install --py jupytext
+RUN jupyter serverextension enable jupytext
 
 RUN pip install --upgrade dash
 
