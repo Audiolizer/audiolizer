@@ -3,6 +3,9 @@ import os
 import pymongo
 from pymongo.errors import DuplicateKeyError
 
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
 client = pymongo.MongoClient(f"mongodb://{os.environ['MONGO_INITDB_ROOT_USERNAME']}:{os.environ['MONGO_INITDB_ROOT_PASSWORD']}@mongo:27017/audiolizer?authSource=admin")
 
 # Database for user accounts
@@ -20,6 +23,7 @@ app_db = client.app_data  # 'app_data' can be the name of your application datab
 settings = app_db.settings  # Example collection for app settings
 logs = app_db.logs  # Example collection for logging app events
 
+ph = PasswordHasher()
 
 def update_password_hash(username, new_hash):
     user = users.find_one({"username": username})
