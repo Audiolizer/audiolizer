@@ -62,31 +62,34 @@ login_layout:
                   - html.H2:
                       children: Login Required
                       className: text-center mb-4
-                  # - dbc.InputGroup:
-                  #     size: lg
-                  #     children:
-                  #       - dbc.InputGroupAddon:
-                  #           addon_type: prepend
-                  #           children: 
-                  #             - dbc.InputGroupText:
-                  #                 children: Username
-                  #       - dbc.Input:
-                  #           type: text
-                  #           placeholder: Enter username
-                  # - dbc.InputGroup:
-                  #     size: lg
-                  #     className: mt-3
-                  #     children:
-                  #       - dbc.InputGroupAddon:
-                  #           addon_type: prepend
-                  #           children: 
-                  #             - dbc.InputGroupText:
-                  #                 children: Password
-                  #       - dbc.Input:
-                  #           type: password
-                  #           placeholder: Enter password
+                  - dbc.InputGroup:
+                      size: lg
+                      children:
+                        - dbc.InputGroupAddon:
+                            addon_type: prepend
+                            children:
+                              - dbc.InputGroupText:
+                                  children: Username
+                        - dbc.Input:
+                            id: username
+                            type: text
+                            placeholder: Enter username
+                  - dbc.InputGroup:
+                      size: lg
+                      className: mt-3
+                      children:
+                        - dbc.InputGroupAddon:
+                            addon_type: prepend
+                            children:
+                              - dbc.InputGroupText:
+                                  children: Password
+                        - dbc.Input:
+                            id: password
+                            type: password
+                            placeholder: Enter password
                   - dbc.Button:
-                      children: Manual Login
+                      id: manual-login-btn
+                      children: Login
                       color: secondary
                       className: mt-3
                       size: lg
@@ -109,50 +112,50 @@ login_layout:
                     size: lg
                     block: true
       - html.Div:
-          id: authorized-hidden
-
-      - dbc.Row:
-          justify: center
-          className: mt-3
-          children:
-            - dbc.Col:
-                md: 6
-                children:
-                  - dbc.Button:
-                      children: Sign up
-                      href: "#"
-                      color: link
-                  - dbc.Button:
-                      children: Forgot password?
-                      href: "#"
-                      color: link
+          id: login-status
 
 nav:
   dbc.Navbar:
     color: dark
+    dark: true
+    expand: md
     children:
-      - html.A:
+      - dbc.Row:
+          align: center
           children:
-            - dbc.Row:
-                align: center
-                justify: between
+            - dbc.Col:
                 children:
-                  - dbc.Col:
-                      width: 4
-                      children:
-                      - html.Img:
-                          id: logo
-                          src: https://github.com/asherp/audiolizer/raw/master/docs/assets/audiolizer_icon.jpg
-                          height: 35px
-                  - dbc.Col:
-                      width: 4
-                      children:
-                      - dbc.NavbarBrand:
-                          children:
-                            html.H2: Market Audiolizer
-                          # className: ml-3
-          # href: https://audiolizer.github.io/audiolizer/
-    dark: True
+                  - html.Img:
+                      id: logo
+                      src: https://github.com/asherp/audiolizer/raw/master/docs/assets/audiolizer_icon.jpg
+                      height: 35px
+            - dbc.Col:
+                children:
+                  - dbc.NavbarBrand:
+                      children: Market Audiolizer
+                      style:
+                        fontSize: 2rem
+      - dbc.NavbarToggler:
+          id: navbar-toggler
+      - dbc.Collapse:
+          id: navbar-collapse
+          navbar: true
+          is_open: false
+          children:
+            - dbc.Nav:
+                className: ml-auto
+                navbar: true
+                children:
+                  - html.Div:
+                      id: nav-username
+                  - dbc.Button:
+                      id: logout-button
+                      children: Logout
+                      color: primary
+                      className: ml-2
+                      n_clicks: 0
+
+
 
 player_settings:
   # - dbc.Col:
@@ -467,6 +470,7 @@ storage:
 layout:
   html.Div:
     children:
+    - ${nav}
     - html.Div:
         id: page-content
     - dcc.Location:
@@ -478,7 +482,6 @@ main_layout:
   dbc.Container:
     fluid: True
     children:
-    - ${nav}
     - dbc.Row:
         justify: left
         align: left

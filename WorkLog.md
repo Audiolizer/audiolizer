@@ -1,7 +1,10 @@
+* manual user logins, refactor audio conversion
+* sub 20m
 
 # 2024-05-27 16:47:16.614179: clock-in
 
 * fixed imports
+
 # 2024-04-20 22:37:34.544815: clock-out
 
 * add db collection for users
