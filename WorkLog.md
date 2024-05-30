@@ -1,3 +1,6 @@
+
+# 2024-05-29 22:12:28.621695: clock-in
+
 # 2024-05-27 21:31:59.806543: clock-out: T-30m 
 
 * manual user logins, refactor audio conversion
