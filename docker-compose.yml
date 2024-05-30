@@ -20,11 +20,14 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
+      ENABLE_GOOGLE_LOGINS: ${ENABLE_GOOGLE_LOGINS}
     command: ["gunicorn", "--workers=1", "--bind", "0.0.0.0:8080", "audiolizer:server"]
     # volumes:
     #   - type: bind
     #     source: ${PWD}
     #     target: /home/audiolizer
+    depends_on:
+      - mongo
     working_dir: /home/audiolizer/audiolizer
 
   audiolizer-dev:
@@ -42,12 +45,15 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
+      ENABLE_GOOGLE_LOGINS: ${ENABLE_GOOGLE_LOGINS}
     command: ["python", "audiolizer.py"] # runs on port 8051
     volumes:
       - type: bind
         source: ${PWD}
         target: /home/audiolizer
     working_dir: /home/audiolizer/audiolizer
+    depends_on:
+      - mongo
 
   test-login:
     build: .
@@ -80,6 +86,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
       APP_SECRET: ${APP_SECRET}
+      ENABLE_GOOGLE_LOGINS: ${ENABLE_GOOGLE_LOGINS}
     command: ["jupyter", "notebook", ".", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - type: bind

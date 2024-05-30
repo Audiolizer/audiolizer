@@ -44,6 +44,7 @@ wav_threshold = int(os.environ.get('AUDIOLIZER_WAV_CACHE_SIZE', 100))  # megabyt
 midi_threshold = int(os.environ.get('AUDIOLIZER_MIDI_CACHE_SIZE', 10))
 price_threshold = int(os.environ.get('AUDIOLIZER_PRICE_CACHE_SIZE', 100))
 enable_user_logins = os.environ.get('ENABLE_USER_LOGINS', '').lower() == 'true'
+enable_google_logins = os.environ.get('ENABLE_GOOGLE_LOGINS', '').lower() == 'true'
 
 logger.info('cache sizes: \n wav:{}Mb\n midi:{}Mb\n price:{}Mb'.format(wav_threshold, midi_threshold, price_threshold))
 
@@ -100,38 +101,48 @@ def handle_authentication(pathname, logout_clicks):
         return '/'
     
     if enable_user_logins:
-        if not (google.authorized or current_user.is_authenticated):
-            return '/'
-    
+        if enable_google_logins:
+            if not (google.authorized or current_user.is_authenticated):
+                return '/'
+        else:
+            if current_user.is_authenticated:
+                return '/'
+
     return dash.no_update
 
 
+if enable_google_logins:
+    google_bp = make_google_blueprint(
+        client_id=os.environ['GOOGLE_CLIENT_ID'],
+        client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+        scope=["openid"],
+        redirect_to='/'
+    )
 
-google_bp = make_google_blueprint(
-    client_id=os.environ['GOOGLE_CLIENT_ID'],
-    client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
-    scope=["openid"],
-    redirect_to='/'
-)
+    app.server.register_blueprint(google_bp, url_prefix="/login")
 
-app.server.register_blueprint(google_bp, url_prefix="/login")
+    @app.server.route('/login/google')
+    def google_login():
+        print("Attempting to redirect to Google login.")
+        return flask.redirect(flask.url_for('google.login'))
 
-@app.server.route('/login/google')
-def google_login():
-    print("Attempting to redirect to Google login.")
-    return flask.redirect(flask.url_for('google.login'))
-
-# Assuming `app.server` is your Flask server instance
-@app.server.route('/login/google/authorized')
-def google_authorized():
-    # This function should handle the OAuth callback logic
-    # Redirect to the root of your Dash app after login
-    return flask.redirect('/')
+    # Assuming `app.server` is your Flask server instance
+    @app.server.route('/login/google/authorized')
+    def google_authorized():
+        # This function should handle the OAuth callback logic
+        # Redirect to the root of your Dash app after login
+        return flask.redirect('/')
 
 
 
 initial_layout = load_components(conf['layout'], conf.get('import'))
 login_layout = load_components(conf['login_layout'], conf.get('import'))
+
+if enable_google_logins:
+    login_google = load_components(conf['login_google'], conf.get('import'))
+    login_layout.children.append(login_google)
+
+
 main_layout = load_components(conf['main_layout'], conf.get('import'))
 
 
@@ -144,13 +155,14 @@ if 'callbacks' in conf:
 
 
 
-
-
 @callbacks.display_layout
 def display_layout(pathname):
     if enable_user_logins:
-        if google.authorized or current_user.is_authenticated:
-            return main_layout
+        if enable_google_logins:
+            if google.authorized or current_user.is_authenticated:
+                return main_layout
+        elif current_user.is_authenticated: 
+                return main_layout
         else:
             return login_layout
     else:
@@ -222,11 +234,12 @@ def update_nav_username(pathname):
     if enable_user_logins:
         if current_user.is_authenticated:
             return html.Span(f"Logged in as: {current_user.username}")
-        elif google.authorized:
-            resp = google.get("/oauth2/v3/userinfo")
-            assert resp.ok, resp.text
-            user_info = resp.json()
-            return html.Span(f"Logged in as: {user_info}")
+        elif enable_google_logins:
+            if google.authorized:
+                resp = google.get("/oauth2/v3/userinfo")
+                assert resp.ok, resp.text
+                user_info = resp.json()
+                return html.Span(f"Logged in as: {user_info}")
     return html.Span("Not logged in")
 
 

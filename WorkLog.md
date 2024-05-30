@@ -1,3 +1,4 @@
+* add registration button, disable google login
 
 # 2024-05-29 22:12:28.621695: clock-in
 

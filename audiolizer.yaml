@@ -62,57 +62,119 @@ login_layout:
                   - html.H2:
                       children: Login Required
                       className: text-center mb-4
-                  - dbc.InputGroup:
-                      size: lg
+                  - dbc.Form:
+                      id: registration-form
                       children:
-                        - dbc.InputGroupAddon:
-                            addon_type: prepend
+                        - dbc.InputGroup:
+                            size: lg
                             children:
-                              - dbc.InputGroupText:
-                                  children: Username
-                        - dbc.Input:
-                            id: username
-                            type: text
-                            placeholder: Enter username
-                  - dbc.InputGroup:
-                      size: lg
-                      className: mt-3
-                      children:
-                        - dbc.InputGroupAddon:
-                            addon_type: prepend
+                              - dbc.InputGroupAddon:
+                                  addon_type: prepend
+                                  children:
+                                    - dbc.InputGroupText:
+                                        children: Username
+                              - dbc.Input:
+                                  id: username
+                                  type: text
+                                  placeholder: Enter username
+                                  className: "is-invalid"  # This class will be toggled in callback
+                        - dbc.FormFeedback:
+                            children: Username is required
+                            id: username-feedback
+                            className: "invalid-feedback"
+                        - dbc.InputGroup:
+                            size: lg
+                            className: mt-3
                             children:
-                              - dbc.InputGroupText:
-                                  children: Password
-                        - dbc.Input:
-                            id: password
-                            type: password
-                            placeholder: Enter password
-                  - dbc.Button:
-                      id: manual-login-btn
-                      children: Login
-                      color: secondary
-                      className: mt-3
-                      size: lg
-                      block: true
-      - html.Br:
-      - dbc.Row:
-          justify: center
-          no_gutters: true
-          children:
-            - dbc.Col:
-                md: 6
-                children:
-                - dbc.Button:
-                    id: google-login-btn
-                    children: Login with Google
-                    external_link: True
-                    href: /login/google
-                    color: primary
-                    className: mt-2 mb-2
-                    size: lg
-                    block: true
+                              - dbc.InputGroupAddon:
+                                  addon_type: prepend
+                                  children:
+                                    - dbc.InputGroupText:
+                                        children: Email
+                              - dbc.Input:
+                                  id: email
+                                  type: email
+                                  placeholder: Enter email (optional)
+                                  className: "is-invalid"  # This class will be toggled in callback
+                        - dbc.FormFeedback:
+                            children: Please enter a valid email
+                            id: email-feedback
+                            className: "invalid-feedback"
+                        - dbc.InputGroup:
+                            size: lg
+                            className: mt-3
+                            children:
+                              - dbc.InputGroupAddon:
+                                  addon_type: prepend
+                                  children:
+                                    - dbc.InputGroupText:
+                                        children: Password
+                              - dbc.Input:
+                                  id: password
+                                  type: password
+                                  placeholder: Enter password
+                                  className: "is-invalid"  # This class will be toggled in callback
+                        - dbc.FormFeedback:
+                            children: Password is required
+                            id: password-feedback
+                            className: "invalid-feedback"
+                        - dbc.InputGroup:
+                            size: lg
+                            className: mt-3
+                            children:
+                              - dbc.InputGroupAddon:
+                                  addon_type: prepend
+                                  children:
+                                    - dbc.InputGroupText:
+                                        children: Confirm Password
+                              - dbc.Input:
+                                  id: confirm-password
+                                  type: password
+                                  placeholder: Confirm password
+                                  className: "is-invalid"  # This class will be toggled in callback
+                        - dbc.FormFeedback:
+                            children: Passwords do not match
+                            id: confirm-password-feedback
+                            className: "invalid-feedback"
+                        - dbc.Button:
+                            id: manual-login-btn
+                            children: Login
+                            color: secondary
+                            className: mt-3
+                            size: lg
+                            block: true
+                        - dbc.Button:
+                            id: register-btn
+                            children: Register
+                            color: primary
+                            className: mt-3
+                            size: lg
+                            block: true
       - html.Div:
           id: login-status
+
+
+
+
+
+login_google:
+  dbc.Row:
+    justify: center
+    no_gutters: true
+    children:
+      - dbc.Col:
+          md: 6
+          children:
+          - dbc.Button:
+              id: google-login-btn
+              children: Login with Google
+              external_link: True
+              href: /login/google
+              color: primary
+              className: mt-2 mb-2
+              size: lg
+              block: true
+
 
 nav:
   dbc.Navbar:
