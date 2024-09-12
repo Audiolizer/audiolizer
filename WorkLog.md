@@ -1,3 +1,37 @@
+# 2024-09-12 13:35:00.472263: clock-out
+
+* Historic Crypto library out of date
+https://github.com/Audiolizer/audiolizer/issues/18
+https://github.com/David-Woroniuk/Historic_Crypto/issues/17
+
+```py
+import http.client
+import json
+from datetime import datetime
+
+# Convert datetime to Unix timestamp
+start = int(datetime.strptime("2024-09-11 00:00:00", '%Y-%m-%d %H:%M:%S').timestamp())
+end = int(datetime.strptime("2024-09-13 00:00:00", '%Y-%m-%d %H:%M:%S').timestamp())
+
+# Establish connection
+conn = http.client.HTTPSConnection("api.coinbase.com")
+payload = ''
+headers = {
+    'Content-Type': 'application/json'
+}
+
+# Make request
+conn.request("GET", f"/api/v3/brokerage/market/products/BTC-USD/candles?start={start}&end={end}&granularity=FIFTEEN_MINUTE&limit=28", payload, headers)
+res = conn.getresponse()
+data = res.read()
+
+# Decode and parse JSON data
+decoded_data = data.decode("utf-8")
+parsed_data = json.loads(decoded_data)
+
+# Output parsed JSON data
+print(parsed_data)
+```
 
 # 2024-09-12 13:21:37.113064: clock-in: T-30m 
 
