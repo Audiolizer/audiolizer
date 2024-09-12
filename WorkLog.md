@@ -1,3 +1,6 @@
+
+# 2024-09-12 13:21:37.113064: clock-in: T-30m 
+
 # 2024-04-19 19:00:55.996430: clock-out
 
 * tonic and mode selection
