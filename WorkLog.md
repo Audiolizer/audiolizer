@@ -1,3 +1,4 @@
+* debuging str error
 
 # 2024-09-13 14:18:22.320432: clock-in
 
