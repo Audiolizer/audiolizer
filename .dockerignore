@@ -4,5 +4,5 @@
 */assets/*.wav
 */history/*.csv
 */hourly-outputs/*
-
+*/Historic_Crypto/*
 client_secret_*

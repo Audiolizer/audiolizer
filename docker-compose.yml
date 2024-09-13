@@ -7,7 +7,7 @@ services:
   #     - "6379:6379"
 
   audiolizer:
-    image: apembroke/audiolizer:0.4.11
+    image: apembroke/audiolizer:0.4.12
     build: .
     ports:
       - "8080:8080"
@@ -18,6 +18,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
+      PYTHONUNBUFFERED: 1
     command: ["gunicorn", "--workers=1", "--bind", "0.0.0.0:8080", "audiolizer:server"]
     # volumes:
     #   - type: bind
@@ -27,7 +28,7 @@ services:
 
   audiolizer-dev:
     build: .
-    image: apembroke/audiolizer:0.4.11
+    image: apembroke/audiolizer:0.4.12
     ports:
       - "8050:8050"
     environment:
@@ -38,6 +39,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
+      PYTHONUNBUFFERED: 1
     command: ["python", "audiolizer.py"] # runs on port 8051
     volumes:
       - type: bind
@@ -47,7 +49,7 @@ services:
 
   test-login:
     build: .
-    image: apembroke/audiolizer:0.4.11
+    image: apembroke/audiolizer:0.4.12
     ports:
       - "8050:8050"
     environment:
@@ -58,6 +60,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       OAUTHLIB_INSECURE_TRANSPORT: 1 # for local dev only!
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
+      PYTHONUNBUFFERED: 1
     command: ["python", "test_login.py"] # runs on port 8051
     volumes:
       - type: bind
@@ -67,7 +70,7 @@ services:
 
   dev:
     build: .
-    image: apembroke/audiolizer:0.4.11
+    image: apembroke/audiolizer:0.4.12
     ports:
       - "8888:8888"
     environment:
@@ -76,6 +79,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       ENABLE_USER_LOGINS: ${ENABLE_USER_LOGINS}
       APP_SECRET: ${APP_SECRET}
+      PYTHONUNBUFFERED: 1
     command: ["jupyter", "notebook", ".", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - type: bind

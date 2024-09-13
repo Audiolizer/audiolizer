@@ -564,8 +564,10 @@ def play(base, quote,
     t0 = t1
 
     # coinbase api now returns data at the appropriate cadence, so no need to refactor
-    # new_ = refactor(new.loc[start_:end_], cadence)
-    new_ = new.loc[start_:end_]
+    if cadence != '15T':
+        new_ = refactor(new.loc[start_:end_], cadence)
+    else:
+        new_ = new.loc[start_:end_]
 
     # add column for average
     new_['avg'] = (new_.open + new_.close) / 2
