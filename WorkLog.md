@@ -1,3 +1,69 @@
+* working frontend with new coinbase api
+
+# 2024-09-13 15:22:09.385451: clock-in
+
+# 2024-09-13 15:01:52.963836: clock-out
+
+* debuging str error
+
+# 2024-09-13 14:18:22.320432: clock-in
+
+# 2024-09-13 12:36:04.403738: clock-out
+
+* fix migrate requirements for Historic Crypto
+* Updated Historic_Crypto library, installing from asherp fork
+* ValueError: cannot convert float NaN to integer
+
+```sh
+Traceback (most recent call last)
+File "/home/audiolizer/audiolizer/audiolizer.py", line 592, in play
+freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+File "/home/audiolizer/audiolizer/audiolizer.py", line 190, in pitch_from_freq
+octave, note = chromatic_pitch(frequency)
+File "/home/audiolizer/audiolizer/audiolizer.py", line 137, in chromatic_pitch
+octave = int(h//12)
+ValueError: cannot convert float NaN to integer
+```
+
+# 2024-09-13 10:29:30.050167: clock-in
+
+# 2024-09-12 13:35:00.472263: clock-out
+
+* Historic Crypto library out of date
+https://github.com/Audiolizer/audiolizer/issues/18
+https://github.com/David-Woroniuk/Historic_Crypto/issues/17
+
+```py
+import http.client
+import json
+from datetime import datetime
+
+# Convert datetime to Unix timestamp
+start = int(datetime.strptime("2024-09-11 00:00:00", '%Y-%m-%d %H:%M:%S').timestamp())
+end = int(datetime.strptime("2024-09-13 00:00:00", '%Y-%m-%d %H:%M:%S').timestamp())
+
+# Establish connection
+conn = http.client.HTTPSConnection("api.coinbase.com")
+payload = ''
+headers = {
+    'Content-Type': 'application/json'
+}
+
+# Make request
+conn.request("GET", f"/api/v3/brokerage/market/products/BTC-USD/candles?start={start}&end={end}&granularity=FIFTEEN_MINUTE&limit=28", payload, headers)
+res = conn.getresponse()
+data = res.read()
+
+# Decode and parse JSON data
+decoded_data = data.decode("utf-8")
+parsed_data = json.loads(decoded_data)
+
+# Output parsed JSON data
+print(parsed_data)
+```
+
+# 2024-09-12 13:21:37.113064: clock-in: T-30m 
+
 # 2024-04-19 19:00:55.996430: clock-out
 
 * tonic and mode selection

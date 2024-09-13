@@ -30,7 +30,8 @@ logger.setLevel(logging.DEBUG)
 
 # +
 import pytz
-
+import sys
+sys.path.append('.')
 from Historic_Crypto import HistoricalData
 import pandas as pd
 import os
@@ -270,7 +271,7 @@ def get_history(ticker, granularity, start_date, end_date = None):
             today_data = get_today(ticker, granularity)
             today_data.to_csv(today_fname, compression='gzip')
         df = pd.concat([df, today_data]).drop_duplicates()
-    return df
+    return df.astype(float)
 
 # + active="ipynb"
 # to = get_today('BTC-USD', 300)
