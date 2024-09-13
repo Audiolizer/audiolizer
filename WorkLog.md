@@ -1,3 +1,5 @@
+# 2024-09-13 15:01:52.963836: clock-out
+
 * debuging str error
 
 # 2024-09-13 14:18:22.320432: clock-in
