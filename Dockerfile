@@ -22,6 +22,11 @@ COPY . /home/audiolizer
 
 WORKDIR /home/audiolizer/audiolizer
 
+RUN apt-get update && apt-get install -y git
+
+# Copy updated Historic_Crypto scripts
+RUN git clone https://github.com/asherp/Historic_Crypto.git
+
 RUN jupyter serverextension enable jupytext
 
 RUN pip install --upgrade dash

@@ -513,7 +513,7 @@ def play(base, quote,
     try:
         new = get_history(ticker, granularity, start, end)
     except:
-        logger.info('cannot get history for {} {} {}'.format(ticker, start, end))
+        logger.info('cannot get history for {} {} {} {}'.format(ticker, granularity, start, end))
         raise
     
     t1 = time.perf_counter()

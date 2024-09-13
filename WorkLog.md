@@ -1,3 +1,4 @@
+* fix migrate requirements for Historic Crypto
 * Updated Historic_Crypto library, installing from asherp fork
 * ValueError: cannot convert float NaN to integer
 
