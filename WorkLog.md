@@ -1,3 +1,16 @@
+* Updated Historic_Crypto library, installing from asherp fork
+* ValueError: cannot convert float NaN to integer
+
+```sh
+Traceback (most recent call last)
+File "/home/audiolizer/audiolizer/audiolizer.py", line 592, in play
+freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+File "/home/audiolizer/audiolizer/audiolizer.py", line 190, in pitch_from_freq
+octave, note = chromatic_pitch(frequency)
+File "/home/audiolizer/audiolizer/audiolizer.py", line 137, in chromatic_pitch
+octave = int(h//12)
+ValueError: cannot convert float NaN to integer
+```
 
 # 2024-09-13 10:29:30.050167: clock-in
 
