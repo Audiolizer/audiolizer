@@ -1,3 +1,4 @@
+* working frontend with new coinbase api
 
 # 2024-09-13 15:22:09.385451: clock-in
 

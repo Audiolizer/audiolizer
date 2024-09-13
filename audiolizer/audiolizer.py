@@ -511,7 +511,7 @@ def play(base, quote,
     t0 = t1
     
     try:
-        new = get_history(ticker, granularity, start, end)
+        new = get_history(ticker, granularity, start, end).astype(float)
     except:
         logger.info('cannot get history for {} {} {} {}'.format(ticker, granularity, start, end))
         raise
@@ -563,9 +563,27 @@ def play(base, quote,
     logger.info('time to set midi params {}'.format(t1-t0))
     t0 = t1
 
-    new_ = refactor(new[start_:end_], cadence)
+    # coinbase api now returns data at the appropriate cadence, so no need to refactor
+    # new_ = refactor(new.loc[start_:end_], cadence)
+    new_ = new.loc[start_:end_]
+
+    # add column for average
+    new_['avg'] = (new_.open + new_.close) / 2
     logger.info('{}->{}'.format(*new_.index[[0,-1]]))
     
+    if new_.isna().any().any():
+        # Initialize the error message
+        error_msg = f'nan values found in candlesticks with start, end, cadence {start_, end_, cadence}. try running get_history with {(ticker, granularity, start, end)}\n\n'
+
+        # Find the rows and columns with NaN values
+        nan_rows, nan_cols = new_.isna().any(axis=1), new_.isna().any(axis=0)
+
+        # Format the rows with NaN values
+        error_msg += "Rows with NaN values: {}\n".format(new_[nan_rows])
+
+        # Raise the error with the formatted message
+        raise ValueError(error_msg)
+
     midi_asset = app.get_asset_url(midi_file)
 
     max_vol = new_.volume.max() # normalizes peak amplitude
@@ -589,12 +607,20 @@ def play(base, quote,
         for t, (price, volume_) in new_[[price_type_, 'volume']].iterrows():
             if ~np.isnan(price):
                 freq_ = get_frequency(price, min_price, max_price, log_freq_range)
-                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+                try:
+                    freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+                except ValueError:
+                    error_msg = f"problem with pitch conversion: {price, min_price, max_price, log_freq_range}"
+                    raise ValueError(error_msg)
                 beep = t, midi_note(freq_), volume_/max_vol, duration
                 beeps.append(beep)
             else:
                 freq_ = get_frequency(min_price, min_price, max_price, log_freq_range)
-                freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+                try:
+                    freq_ = freq_from_pitch(pitch_from_freq(freq_, scale_notes))
+                except ValueError:
+                    error_msg = f'problem with pitch conversion: min_price, min_price, max_price, log_freq_range = {min_price, min_price, max_price, log_freq_range}'
+                    raise ValueError(error_msg)
                 beep = t, midi_note(freq_), 0, duration
                 beeps.append(beep)
                 logger.warning('found nan price {}, {}, {}'.format(t, price, volume_))
