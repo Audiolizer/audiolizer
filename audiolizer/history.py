@@ -40,6 +40,20 @@ from datetime import datetime
 def get_timezones(url):
     return [dict(label=v, value=v) for v in pytz.all_timezones]
 
+#these are the granularities available from the new coinbase api
+# Should these replace valid_granularities?
+API_GRANULARITIES = {
+   60: 'ONE_MINUTE',
+    300: 'FIVE_MINUTE',
+    900: 'FIFTEEN_MINUTE',
+    1800: 'THIRTY_MINUTE',
+    3600: 'ONE_HOUR',
+    7200 : 'TWO_HOUR',
+    21600: 'SIX_HOUR',
+    86400: 'ONE_DAY'
+}
+
+
 valid_granularities = [60, 300, 900, 3600, 21600, 86400]
 granularity = int(os.environ.get('AUDIOLIZER_GRANULARITY', 300)) # seconds
 
@@ -123,6 +137,7 @@ def write_data(df, ticker, granularity):
     Note: data gaps will result if a partial day provided.
     Make sure data is complete before passing to this function
     """
+    # this breaks when df is a single date
     for t, group in df.groupby(pd.Grouper(freq='1D')):
         tstr = t.strftime('%Y-%m-%d-%H-%M')
         fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(

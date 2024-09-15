@@ -563,11 +563,14 @@ def play(base, quote,
     logger.info('time to set midi params {}'.format(t1-t0))
     t0 = t1
 
-    # coinbase api now returns data at the appropriate cadence, so no need to refactor
-    if cadence != '15T':
+    # cadence may be larger than the granularity
+    cadence_sec = pd.Timedelta(cadence).total_seconds()
+    if cadence_sec > granularity:
         new_ = refactor(new.loc[start_:end_], cadence)
-    else:
+    elif cadence_sec == granularity:
         new_ = new.loc[start_:end_]
+    else:
+        raise NotImplementedError(f'cadence {cadence} is less than available granularity {granularity}')
 
     # add column for average
     new_['avg'] = (new_.open + new_.close) / 2
