@@ -1,3 +1,6 @@
+
+# 2024-09-16 09:35:16.316738: clock-in: T-40m 
+
 # 2024-09-14 23:13:14.654908: clock-out
 
 * debugging daily candles
