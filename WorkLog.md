@@ -1,3 +1,4 @@
+* debugging date resolution
 
 # 2024-09-16 09:35:16.316738: clock-in: T-40m 
 
