@@ -573,7 +573,7 @@ def play(base, quote,
         raise NotImplementedError(f'cadence {cadence} is less than available granularity {granularity}')
 
     # add column for average
-    new_['avg'] = (new_.open + new_.close) / 2
+    new_.loc[:, 'avg'] = (new_.open + new_.close) / 2
     logger.info('{}->{}'.format(*new_.index[[0,-1]]))
     
     if new_.isna().any().any():

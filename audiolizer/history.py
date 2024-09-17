@@ -143,6 +143,7 @@ def write_data(df, ticker, granularity):
         fname = audiolizer_temp_dir + '/{}-{}-{}.csv.gz'.format(
                 ticker, granularity, t.strftime('%Y-%m-%d'))
         group.to_csv(fname, compression='gzip')
+        assert os.path.exists(fname)
         logger.info('wrote {}'.format(fname))
         
 def fetch_missing(files_status, ticker, granularity):
