@@ -1,3 +1,5 @@
+# 2024-09-16 19:55:51.668524: clock-out
+
 * debugging lower res query
 `df = get_history('BTC-USD', 15*60, '2024-09-10')`
 
